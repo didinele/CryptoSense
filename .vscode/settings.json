@@ -8,5 +8,6 @@
 		{
 			"value": "Always conform to the rules set in `.github/copilot-instructions.md`. Read the file before answering project-wide architectural choices."
 		}
-	]
+	],
+	"js/ts.tsdk.path": "node_modules/typescript/lib"
 }

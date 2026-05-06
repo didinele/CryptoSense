@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@cryptosense/core"],
-  experimental: {
-    reactCompiler: true,
-  },
+	transpilePackages: ['@cryptosense/core'],
+	reactCompiler: true,
 };
 
 export default nextConfig;

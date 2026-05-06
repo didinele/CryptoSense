@@ -11,7 +11,8 @@
 		"postgres": "^3.4.4"
 	},
 	"devDependencies": {
+		"@types/node": "^25.6.0",
 		"ley": "^0.8.1",
-		"typescript": "^5.4.0"
+		"typescript": "^5.9.3"
 	}
 }
