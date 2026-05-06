@@ -1,0 +1,12 @@
+{
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit"
+	},
+	"github.copilot.chat.codeGeneration.instructions": [
+		{
+			"value": "Always conform to the rules set in `.github/copilot-instructions.md`. Read the file before answering project-wide architectural choices."
+		}
+	]
+}

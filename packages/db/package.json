@@ -1,0 +1,17 @@
+{
+	"name": "@cryptosense/db",
+	"version": "0.1.0",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"scripts": {
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix"
+	},
+	"dependencies": {
+		"postgres": "^3.4.4"
+	},
+	"devDependencies": {
+		"ley": "^0.8.1",
+		"typescript": "^5.4.0"
+	}
+}
