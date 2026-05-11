@@ -10,9 +10,9 @@ export async function syncMarketData() {
 		console.log('[Cron] Fetching market data from Binance...');
 		// Fetch data from Binance for target symbols
 		const responses = await Promise.all(
-			SYMBOLS.map((symbol) =>
+			SYMBOLS.map(async (symbol) =>
 				fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`)
-					.then((res) => res.json() as Promise<{ symbol: string; price: string }>),
+					.then(async (res) => res.json() as Promise<{ price: string, symbol: string; }>),
 			),
 		);
 

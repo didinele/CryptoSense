@@ -1,3 +1,4 @@
+import { setTimeout, clearTimeout } from 'node:timers';
 import { z } from 'zod';
 
 export const AnalystOutputSchema = z.object({
@@ -42,14 +43,14 @@ export async function runAnalystAgent(symbol: string, prices: number[]): Promise
 		// Aici configurăm apelul către un model LLM rulat local (ex. Ollama API)
 		// Prin intermediul portului standard 11434, specific pentru modele locale (Gemma, LLaMa)
 		const controller = new AbortController();
-		const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+		const timeoutId = setTimeout(() => controller.abort(), 30_000); // 30 second timeout
 
 		const response = await fetch('http://localhost:11434/api/generate', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				model: 'llama3', // Trecem la Llama 3 (8B parametri), net superior matematic
-				prompt: prompt,
+				prompt,
 				stream: false,
 				format: 'json',
 			}),

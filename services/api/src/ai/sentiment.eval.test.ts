@@ -33,6 +33,6 @@ describe('Sentiment Agent AI Evals', () => {
 		// Scorul ar trebui sa fie in range 0-100
 		expect(result.aggregateScore).toBeGreaterThanOrEqual(0);
 		expect(result.aggregateScore).toBeLessThanOrEqual(100);
-	}, 60000); // 60s timeout pt local LLM
+	}, 60_000); // 60s timeout pt local LLM
 
 });

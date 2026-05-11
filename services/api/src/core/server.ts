@@ -1,9 +1,9 @@
 import type { ServerResponse as Response } from 'node:http';
 import process from 'node:process';
 import { isBoom } from '@hapi/boom';
+import cors from 'cors';
 import polka from 'polka';
 import type { Request as PolkaRequest } from 'polka';
-import cors from 'cors';
 import { ZodError } from 'zod';
 import { jsonParser } from '../http/jsonParser.js';
 import { sendJSON } from '../http/response.js';

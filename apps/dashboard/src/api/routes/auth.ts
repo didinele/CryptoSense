@@ -1,10 +1,9 @@
-import type { InferRouteContract } from 'api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { InferRouteContract, loginRoute, registerRoute, meRoute  } from 'api';
 import { apiFetch } from '../fetch';
 import { queryKeys } from '../queryClient';
 
 // Get types from backend API package
-import type { loginRoute, registerRoute, meRoute } from 'api';
 
 type RegisterContract = InferRouteContract<typeof registerRoute>;
 type LoginContract = InferRouteContract<typeof loginRoute>;
@@ -23,7 +22,7 @@ export function useMe() {
 	return useQuery({
 		...me,
 		retry: false,
-		staleTime: 1000 * 60 * 5, // 5 minutes
+		staleTime: 1_000 * 60 * 5, // 5 minutes
 	});
 }
 
@@ -31,9 +30,7 @@ export function useRegister(options?: { onSuccess?(): void }) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async (body: RegisterBody) => {
-			return apiFetch<RegisterContract['response']>('post', '/api/v1/auth/register', { body });
-		},
+		mutationFn: async (body: RegisterBody) => apiFetch<RegisterContract['response']>('post', '/api/v1/auth/register', { body }),
 		onSuccess: () => {
 			void queryClient.invalidateQueries({ queryKey: queryKeys.auth.me });
 			options?.onSuccess?.();
@@ -45,9 +42,7 @@ export function useLogin(options?: { onSuccess?(): void }) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async (body: LoginBody) => {
-			return apiFetch<LoginContract['response']>('post', '/api/v1/auth/login', { body });
-		},
+		mutationFn: async (body: LoginBody) => apiFetch<LoginContract['response']>('post', '/api/v1/auth/login', { body }),
 		onSuccess: () => {
 			void queryClient.invalidateQueries({ queryKey: queryKeys.auth.me });
 			options?.onSuccess?.();
@@ -59,9 +54,7 @@ export function useLogout(options?: { onSuccess?(): void }) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async () => {
-			return apiFetch('post', '/api/v1/auth/logout');
-		},
+		mutationFn: async () => apiFetch('post', '/api/v1/auth/logout'),
 		onSuccess: () => {
 			queryClient.setQueryData(queryKeys.auth.me, null);
 			void queryClient.invalidateQueries({ queryKey: queryKeys.auth.me });

@@ -1,3 +1,4 @@
+import { setTimeout, clearTimeout } from 'node:timers';
 import { z } from 'zod';
 
 export const NewsItemSchema = z.object({
@@ -44,14 +45,14 @@ export async function runSentimentAgent(symbol: string, newsHeadlines: string[])
 
 	try {
 		const controller = new AbortController();
-		const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+		const timeoutId = setTimeout(() => controller.abort(), 30_000); // 30 second timeout
 
 		const response = await fetch('http://localhost:11434/api/generate', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				model: 'llama3',
-				prompt: prompt,
+				prompt,
 				stream: false,
 				format: 'json',
 			}),
@@ -98,7 +99,7 @@ function fallbackSentimentAnalysis(headlines: string[]): SentimentOutput {
 		const lower = h.toLowerCase();
 		const hasPos = positiveWords.some((w) => lower.includes(w));
 		const hasNeg = negativeWords.some((w) => lower.includes(w));
-		let pol: 'positive' | 'negative' | 'neutral' = 'neutral';
+		let pol: 'negative' | 'neutral' | 'positive' = 'neutral';
 		if (hasPos && !hasNeg) {
 			pol = 'positive';
 			score += 5;
@@ -106,6 +107,7 @@ function fallbackSentimentAnalysis(headlines: string[]): SentimentOutput {
 			pol = 'negative';
 			score -= 5;
 		}
+
 		return { headline: h, polarity: pol };
 	});
 

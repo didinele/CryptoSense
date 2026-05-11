@@ -23,7 +23,12 @@ const typeScriptRuleset = merge(...typescript, {
 		parserOptions: {
 			warnOnUnsupportedTypeScriptVersion: false,
 			allowAutomaticSingleRunInference: true,
-			project: ['tsconfig.eslint.json', 'apps/*/tsconfig.eslint.json', 'packages/*/tsconfig.eslint.json', 'services/*/tsconfig.eslint.json'],
+			project: [
+				'tsconfig.eslint.json',
+				'apps/*/tsconfig.eslint.json',
+				'packages/*/tsconfig.eslint.json',
+				'services/*/tsconfig.eslint.json',
+			],
 		},
 	},
 	rules: {
@@ -41,12 +46,18 @@ const typeScriptRuleset = merge(...typescript, {
 		],
 		'id-length': [0],
 		'unicorn/catch-error-name': [0],
+		'unicorn/error-message': [0],
 	},
 	settings: {
 		'import-x/resolver-next': [
 			createTypeScriptImportResolver({
 				noWarnOnMultipleProjects: true,
-				project: ['tsconfig.eslint.json', 'apps/*/tsconfig.eslint.json', 'packages/*/tsconfig.eslint.json', 'services/*/tsconfig.eslint.json'],
+				project: [
+					'tsconfig.eslint.json',
+					'apps/*/tsconfig.eslint.json',
+					'packages/*/tsconfig.eslint.json',
+					'services/*/tsconfig.eslint.json',
+				],
 			}),
 		],
 	},
@@ -65,6 +76,10 @@ const reactRuleset = merge(...react, {
 		'jsdoc/no-bad-blocks': 0,
 		'tsdoc/syntax': 0,
 		'@typescript-eslint/unbound-method': 0,
+		'react/button-has-type': 0,
+		'react/hook-use-state': 0,
+		'@typescript-eslint/explicit-member-accessibility': 0,
+		'@typescript-eslint/no-base-to-string': 0,
 	},
 });
 
@@ -88,6 +103,7 @@ export default tseslint.config(
 			'**/.next/',
 			'**/shiki.bundle.ts',
 			'packages/core/src/types/entities.ts',
+			'.yarn/**',
 		],
 	},
 	commonRuleset,

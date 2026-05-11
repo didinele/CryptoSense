@@ -1,8 +1,8 @@
 import db from '@cryptosense/db';
 import { z } from 'zod';
+import { runAnalystAgent, AnalystOutputSchema } from '../../ai/analyst.js';
 import { requireAuth } from '../../auth/middleware.js';
 import { defineRoute } from '../../core/route.js';
-import { runAnalystAgent, AnalystOutputSchema } from '../../ai/analyst.js';
 
 export const analyzeSymbolSchema = {
 	query: z.object({
@@ -35,8 +35,6 @@ export const analyzeSymbolRoute = defineRoute({
 		const prices = rows.map(r => Number(r['price'])).reverse();
 
 		// Rulăm AI Agent-ul peste setul de date
-		const analysis = await runAnalystAgent(symbol, prices);
-
-		return analysis;
+		return runAnalystAgent(symbol, prices);
 	},
 });

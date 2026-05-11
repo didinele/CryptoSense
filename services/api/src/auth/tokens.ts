@@ -49,7 +49,7 @@ export const ACCESS_TOKEN_HEADER = 'X-Update-Access-Token';
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1_000;
 
 export function setRefreshCookie(res: Response, token: string): void {
-	const isProd = process.env['NODE_ENV'] === 'production';
+	const isProd = process.env.NODE_ENV === 'production';
 	setCookie(res, REFRESH_COOKIE, token, {
 		httpOnly: true,
 		maxAge: THIRTY_DAYS_MS / 1_000,
@@ -60,7 +60,7 @@ export function setRefreshCookie(res: Response, token: string): void {
 }
 
 export function clearRefreshCookie(res: Response): void {
-	const isProd = process.env['NODE_ENV'] === 'production';
+	const isProd = process.env.NODE_ENV === 'production';
 	clearCookie(res, REFRESH_COOKIE, {
 		httpOnly: true,
 		path: '/api/v1/auth',

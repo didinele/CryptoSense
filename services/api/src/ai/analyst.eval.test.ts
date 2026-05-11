@@ -5,7 +5,7 @@ describe('AI Agent Evals: Analyst', () => {
 
 	it('should gracefully respond with valid JSON structure when given normal prices', async () => {
 		// Mock prices representing a 10% dump
-		const mockPrices = [60000, 58000, 56000, 54000];
+		const mockPrices = [60_000, 58_000, 56_000, 54_000];
 		
 		const result = await runAnalystAgent('BTCUSDT', mockPrices);
 		
@@ -16,7 +16,7 @@ describe('AI Agent Evals: Analyst', () => {
 		expect(result).toHaveProperty('support');
 		expect(result).toHaveProperty('resistance');
 		expect(result.reasoning).toBeTypeOf('string');
-	}, 60000); // 60s timeout for local LLM generation
+	}, 60_000); // 60s timeout for local LLM generation
 
 	it('should successfully detect high volatility (dump > 5%)', async () => {
 		const volatilityPrices = [100, 96, 92, 85]; // Starts at 100, drops to 85 -> 15% drop.
@@ -24,6 +24,6 @@ describe('AI Agent Evals: Analyst', () => {
 		const result = await runAnalystAgent('FAKECOIN', volatilityPrices);
 		expect(result.volatilityAlert).toBe(true);
 		expect(Math.abs(result.volatilityPercentage)).toBeGreaterThanOrEqual(5);
-	}, 60000); // 60s timeout for local LLM generation
+	}, 60_000); // 60s timeout for local LLM generation
 
 });

@@ -10,7 +10,7 @@ export function Providers({ children }: PropsWithChildren) {
 			new QueryClient({
 				defaultOptions: {
 					queries: {
-						staleTime: 60 * 1000,
+						staleTime: 60 * 1_000,
 						retry: false,
 					},
 				},

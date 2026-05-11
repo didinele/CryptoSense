@@ -23,6 +23,7 @@ function buildURL(path: string, query?: FetchOptions['query']): string {
 			}
 		}
 	}
+
 	return url.toString();
 }
 
@@ -36,6 +37,7 @@ async function parseError(response: Response): Promise<APIError> {
 	} catch {
 		// Ignore
 	}
+
 	return new APIError(message, response.status);
 }
 
