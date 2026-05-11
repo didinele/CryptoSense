@@ -42,7 +42,7 @@ export async function runAnalystAgent(symbol: string, prices: number[]): Promise
 		// Aici configurăm apelul către un model LLM rulat local (ex. Ollama API)
 		// Prin intermediul portului standard 11434, specific pentru modele locale (Gemma, LLaMa)
 		const controller = new AbortController();
-		const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+		const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
 		const response = await fetch('http://localhost:11434/api/generate', {
 			method: 'POST',

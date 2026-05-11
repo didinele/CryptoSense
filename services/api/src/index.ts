@@ -8,3 +8,5 @@ export { logoutRoute } from './routes/auth/logout.js';
 export { meSchema, meRoute } from './routes/auth/me.js';
 
 export { analyzeSymbolSchema, analyzeSymbolRoute } from './routes/market/analysis.js';
+export { sentimentSymbolSchema, sentimentSymbolRoute } from './routes/market/sentiment.js';
+export { strategySchema, strategyRoute } from './routes/market/strategy.js';

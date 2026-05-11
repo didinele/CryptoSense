@@ -5,12 +5,16 @@ import { logoutRoute } from './routes/auth/logout.js';
 import { meRoute } from './routes/auth/me.js';
 import { registerRoute } from './routes/auth/register.js';
 import { analyzeSymbolRoute } from './routes/market/analysis.js';
+import { sentimentSymbolRoute } from './routes/market/sentiment.js';
+import { strategyRoute } from './routes/market/strategy.js';
 
 mountRoute(registerRoute);
 mountRoute(loginRoute);
 mountRoute(logoutRoute);
 mountRoute(meRoute);
 mountRoute(analyzeSymbolRoute);
+mountRoute(sentimentSymbolRoute);
+mountRoute(strategyRoute);
 
 startServer();
 startMarketSyncCron();
