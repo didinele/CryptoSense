@@ -54,7 +54,7 @@ export default function DashboardPage() {
 		<div className="min-h-screen bg-gray-900 p-8 text-white">
 			<div className="mx-auto max-w-4xl">
 				<div className="mb-8 flex items-center justify-between">
-					<h1 className="text-3xl font-bold">CryptoSense Dashboard</h1>
+					<h1 className="text-3xl font-bold">Dashboard</h1>
 					<div className="flex items-center gap-4">
 						<span className="text-gray-400">{user?.username ?? 'User'}</span>
 						<button
