@@ -1,9 +1,49 @@
 @import "tailwindcss";
 
+/* Class-based dark mode (e.g. via next-themes) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+	--base: #eceef5;
+	--primary: #171b35;
+	--secondary: rgba(23, 27, 53, 0.6);
+	--card: #ffffff;
+	--on-primary: rgba(23, 27, 53, 0.25);
+	--on-secondary: rgba(23, 27, 53, 0.15);
+	--on-tertiary: rgba(23, 27, 53, 0.05);
+	--disabled: rgba(23, 27, 53, 0.5);
+}
+
+.dark {
+	--base: #0e0f1a;
+	--primary: #e6e8f5;
+	--secondary: rgba(230, 232, 245, 0.6);
+	--card: #16192b;
+	--on-primary: rgba(230, 232, 245, 0.2);
+	--on-secondary: rgba(230, 232, 245, 0.1);
+	--on-tertiary: rgba(230, 232, 245, 0.05);
+	--disabled: rgba(230, 232, 245, 0.4);
+}
+
+@theme inline {
+	--color-base: var(--base);
+	--color-primary: var(--primary);
+	--color-secondary: var(--secondary);
+	--color-card: var(--card);
+	--color-on-primary: var(--on-primary);
+	--color-on-secondary: var(--on-secondary);
+	--color-on-tertiary: var(--on-tertiary);
+	--color-disabled: var(--disabled);
+}
+
 @theme {
-  --color-primary: #3b82f6;
+	--color-misc-accent: #4b8bf5;
+	--color-misc-danger: #ef4444;
+	--color-misc-success: #22c55e;
+	--color-white: #ffffff;
 }
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+	background-color: var(--base);
+	color: var(--primary);
 }
