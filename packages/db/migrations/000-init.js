@@ -4,6 +4,7 @@ exports.up = async function (sql) {
 			id SERIAL PRIMARY KEY,
 			email VARCHAR(255) UNIQUE NOT NULL,
 			password_hash VARCHAR(255) NOT NULL,
+			password_changed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 			created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 		);
 	`;
@@ -17,7 +18,7 @@ exports.up = async function (sql) {
 			created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 		);
 	`;
-	
+
 	await sql`CREATE INDEX IF NOT EXISTS market_data_symbol_idx ON market_data(symbol);`;
 	await sql`CREATE INDEX IF NOT EXISTS market_data_timestamp_idx ON market_data(timestamp);`;
 };
