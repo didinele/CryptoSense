@@ -8,7 +8,7 @@
 		"start": "next start",
 		"lint": "eslint \"{src,app}/**/*.{ts,tsx}\"",
 		"lint:fix": "eslint \"{src,app}/**/*.{ts,tsx}\" --fix",
-		"test": "vitest"
+		"test": "echo 'No tests configured for dashboard'"
 	},
 	"dependencies": {
 		"@cryptosense/core": "workspace:*",

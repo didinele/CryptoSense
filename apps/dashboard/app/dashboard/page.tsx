@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useMe, useLogout } from '@/api/routes/auth';
-import { useAnalyzeSymbol } from '@/api/routes/analysis';
+import { useAnalyzeSymbol, type AnalysisData } from '@/api/routes/analysis';
 
 export default function DashboardPage() {
 	const { data: user, isLoading, isError } = useMe();
@@ -11,7 +11,13 @@ export default function DashboardPage() {
 	const router = useRouter();
 
 	const [symbol, setSymbol] = useState('BTCUSDT');
-	const { data: analysis, isLoading: isAnalyzing, error: analyzeError, refetch: runAnalysis } = useAnalyzeSymbol(symbol, { enabled: false });
+	const {
+		data: rawAnalysis,
+		isLoading: isAnalyzing,
+		error: analyzeError,
+		refetch: runAnalysis,
+	} = useAnalyzeSymbol(symbol, { enabled: false });
+	const analysis = rawAnalysis as AnalysisData | undefined;
 
 	useEffect(() => {
 		if (isError) {
@@ -56,9 +62,7 @@ export default function DashboardPage() {
 				<div className="rounded-lg bg-gray-800 p-6 shadow-md">
 					<div className="mb-4 flex items-center justify-between">
 						<h2 className="text-xl font-semibold">Epic 1.1: Market Data Sync</h2>
-						<span className="rounded bg-indigo-900 px-3 py-1 text-xs font-semibold text-indigo-300">
-							CRON Active
-						</span>
+						<span className="rounded bg-indigo-900 px-3 py-1 text-xs font-semibold text-indigo-300">CRON Active</span>
 					</div>
 					<p className="text-gray-300">
 						Data is being fetched real-time from Binance API in background (Every 5 minutes).
@@ -91,7 +95,7 @@ export default function DashboardPage() {
 					</div>
 
 					{analyzeError && (
-						<div className="p-4 bg-red-900/50 text-red-200 border border-red-700/50 rounded">
+						<div className="rounded border border-red-700/50 bg-red-900/50 p-4 text-red-200">
 							❌ Failed fetching analysis: {(analyzeError as any).message || 'Server Error'}
 						</div>
 					)}
@@ -99,34 +103,39 @@ export default function DashboardPage() {
 					{analysis && (
 						<div className="mt-4 space-y-4">
 							{analysis.volatilityAlert && (
-								<div className="flex items-center gap-2 rounded bg-yellow-600/20 p-3 border border-yellow-600/50 text-yellow-500 font-medium">
+								<div className="flex items-center gap-2 rounded border border-yellow-600/50 bg-yellow-600/20 p-3 font-medium text-yellow-500">
 									⚠️ Volatility Alert! The price fluctuated by {analysis.volatilityPercentage}% recently!
 								</div>
 							)}
 
 							<div className="grid grid-cols-3 gap-4">
 								<div className="rounded bg-gray-700 p-4">
-									<p className="text-xs text-gray-400 uppercase tracking-wider">Trend</p>
-									<p className={`text-lg font-bold capitalize ${
-										analysis.trend === 'bullish' ? 'text-green-400' :
-										analysis.trend === 'bearish' ? 'text-red-400' : 'text-gray-300'
-									}`}>
+									<p className="text-xs tracking-wider text-gray-400 uppercase">Trend</p>
+									<p
+										className={`text-lg font-bold capitalize ${
+											analysis.trend === 'bullish'
+												? 'text-green-400'
+												: analysis.trend === 'bearish'
+													? 'text-red-400'
+													: 'text-gray-300'
+										}`}
+									>
 										{analysis.trend}
 									</p>
 								</div>
 								<div className="rounded bg-gray-700 p-4">
-									<p className="text-xs text-gray-400 uppercase tracking-wider">Support</p>
+									<p className="text-xs tracking-wider text-gray-400 uppercase">Support</p>
 									<p className="text-lg font-bold text-gray-200">${analysis.support}</p>
 								</div>
 								<div className="rounded bg-gray-700 p-4">
-									<p className="text-xs text-gray-400 uppercase tracking-wider">Resistance</p>
+									<p className="text-xs tracking-wider text-gray-400 uppercase">Resistance</p>
 									<p className="text-lg font-bold text-gray-200">${analysis.resistance}</p>
 								</div>
 							</div>
 
-							<div className="rounded bg-gray-900 p-4 border-l-4 border-blue-500">
-								<h3 className="text-sm font-semibold text-gray-400 mb-2">Agent's Reasoning</h3>
-								<p className="text-gray-300 text-sm leading-relaxed">{analysis.reasoning}</p>
+							<div className="rounded border-l-4 border-blue-500 bg-gray-900 p-4">
+								<h3 className="mb-2 text-sm font-semibold text-gray-400">Agent's Reasoning</h3>
+								<p className="text-sm leading-relaxed text-gray-300">{analysis.reasoning}</p>
 							</div>
 						</div>
 					)}

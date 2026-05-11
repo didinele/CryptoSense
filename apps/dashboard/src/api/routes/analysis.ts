@@ -1,20 +1,18 @@
-import type { InferRouteContract } from 'api';
 import { useQuery } from '@tanstack/react-query';
+import type { InferRouteContract, analyzeSymbolRoute } from 'api';
 import { apiFetch } from '../fetch';
 
-import type { analyzeSymbolRoute } from 'api';
-
 type AnalyzeSymbolContract = InferRouteContract<typeof analyzeSymbolRoute>;
+export type AnalysisData = AnalyzeSymbolContract['response'];
 
 export function useAnalyzeSymbol(symbol: string, options?: { enabled?: boolean }) {
 	return useQuery({
 		queryKey: ['api', 'market', 'analysis', symbol],
-		queryFn: async () => {
-			return apiFetch<AnalyzeSymbolContract['response']>('get', '/api/v1/market/analysis', {
+		queryFn: async () =>
+			apiFetch<AnalysisData>('get', '/api/v1/market/analysis', {
 				query: { symbol },
-			});
-		},
-		enabled: options?.enabled,
-		staleTime: 1000 * 60 * 2, // 2 minute
+			}),
+		...(options?.enabled !== undefined && { enabled: options.enabled }),
+		staleTime: 1_000 * 60 * 2, // 2 minute
 	});
 }
