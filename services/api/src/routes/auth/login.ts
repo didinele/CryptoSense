@@ -7,12 +7,12 @@ import { defineRoute } from '../../core/route.js';
 
 export const loginSchema = {
 	body: z.object({
-		email: z.string().email(),
+		username: z.string(),
 		password: z.string(),
 	}),
 	response: z.object({
 		id: z.number(),
-		email: z.string(),
+		username: z.string(),
 	}),
 };
 
@@ -21,9 +21,9 @@ export const loginRoute = defineRoute({
 	path: '/api/v1/auth/login',
 	schema: loginSchema,
 	async handler(req, res) {
-		const { email, password } = req.body;
+		const { username, password } = req.body;
 
-		const [user] = await db`SELECT id, email, password_hash FROM users WHERE email = ${email}`;
+		const [user] = await db`SELECT id, username, password_hash FROM users WHERE username = ${username}`;
 
 		// Dummy hash for anti-enumeration timing
 		const dummyHash = '$2b$12$A8l4.bV6qO.5.1A3z4c1bO3Wq5O.5.1A3z4c1bO3Wq5O.5.1A3z4';
@@ -32,7 +32,7 @@ export const loginRoute = defineRoute({
 		const isValid = await bcrypt.compare(password, hashToCompare);
 
 		if (!user || !isValid) {
-			throw unauthorized('Invalid email or password');
+			throw unauthorized('Invalid username or password');
 		}
 
 		const accountId = user['id'];
@@ -42,7 +42,7 @@ export const loginRoute = defineRoute({
 
 		return {
 			id: accountId,
-			email: user['email'],
+			username: user['username'],
 		};
 	},
 });

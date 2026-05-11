@@ -3,6 +3,7 @@ import process from 'node:process';
 import { isBoom } from '@hapi/boom';
 import polka from 'polka';
 import type { Request as PolkaRequest } from 'polka';
+import cors from 'cors';
 import { ZodError } from 'zod';
 import { jsonParser } from '../http/jsonParser.js';
 import { sendJSON } from '../http/response.js';
@@ -34,6 +35,11 @@ export function createServer() {
 		},
 	});
 
+	app.use(cors({
+		origin: ['http://localhost:3000'],
+		credentials: true,
+		exposedHeaders: ['x-update-access-token']
+	}));
 	app.use(jsonParser() as any);
 	return app;
 }

@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useLogin } from '@/api/routes/auth';
 
 export default function LoginPage() {
-	const [email, setEmail] = useState('');
+	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
 	const router = useRouter();
@@ -20,7 +20,7 @@ export default function LoginPage() {
 		e.preventDefault();
 		setError('');
 		try {
-			await login.mutateAsync({ email, password });
+			await login.mutateAsync({ username, password });
 		} catch (err: any) {
 			setError(err.message || 'Login failed');
 		}
@@ -34,11 +34,11 @@ export default function LoginPage() {
 				<form className="flex flex-col gap-4" onSubmit={handleSubmit}>
 					<input
 						className="rounded bg-gray-700 p-2"
-						onChange={(e) => setEmail(e.target.value)}
-						placeholder="Email"
+						onChange={(e) => setUsername(e.target.value)}
+						placeholder="Username"
 						required
-						type="email"
-						value={email}
+						type="text"
+						value={username}
 					/>
 					<input
 						className="rounded bg-gray-700 p-2"

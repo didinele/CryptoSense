@@ -7,7 +7,7 @@ import { defineRoute } from '../../core/route.js';
 export const meSchema = {
 	response: z.object({
 		id: z.number(),
-		email: z.string(),
+		username: z.string(),
 	}),
 };
 
@@ -17,7 +17,7 @@ export const meRoute = defineRoute({
 	schema: meSchema,
 	middleware: [requireAuth] as const,
 	async handler(req) {
-		const [user] = await db`SELECT id, email FROM users WHERE id = ${req.identity.accountId}`;
+		const [user] = await db`SELECT id, username FROM users WHERE id = ${req.identity.accountId}`;
 
 		if (!user) {
 			throw notFound('User not found');
@@ -25,7 +25,7 @@ export const meRoute = defineRoute({
 
 		return {
 			id: user['id'],
-			email: user['email'],
+			username: user['username'],
 		};
 	},
 });

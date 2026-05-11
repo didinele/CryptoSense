@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRegister } from '@/api/routes/auth';
 
 export default function RegisterPage() {
-	const [email, setEmail] = useState('');
+	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
 	const [error, setError] = useState('');
@@ -27,7 +27,7 @@ export default function RegisterPage() {
 		}
 
 		try {
-			await register.mutateAsync({ email, password });
+			await register.mutateAsync({ username, password });
 		} catch (err: any) {
 			setError(err.message || 'Registration failed');
 		}
@@ -41,11 +41,11 @@ export default function RegisterPage() {
 				<form className="flex flex-col gap-4" onSubmit={handleSubmit}>
 					<input
 						className="rounded bg-gray-700 p-2"
-						onChange={(e) => setEmail(e.target.value)}
-						placeholder="Email"
+						onChange={(e) => setUsername(e.target.value)}
+						placeholder="Username"
 						required
-						type="email"
-						value={email}
+						type="text"
+						value={username}
 					/>
 					<input
 						className="rounded bg-gray-700 p-2"

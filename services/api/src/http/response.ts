@@ -1,6 +1,5 @@
 import type { ServerResponse as Response } from 'node:http';
-import type { SerializeOptions } from 'cookie';
-import cookie from 'cookie';
+import { serialize, type SerializeOptions } from 'cookie';
 
 export function appendHeader(res: Response, header: string, value: string[] | number | string): void {
 	const current = res.getHeader(header);
@@ -19,7 +18,7 @@ export function appendHeader(res: Response, header: string, value: string[] | nu
 }
 
 export function setCookie(res: Response, name: string, data: string, options?: SerializeOptions): void {
-	appendHeader(res, 'Set-Cookie', cookie.serialize(name, data, options));
+	appendHeader(res, 'Set-Cookie', serialize(name, data, options));
 }
 
 export function clearCookie(res: Response, name: string, options?: Omit<SerializeOptions, 'expires'>): void {

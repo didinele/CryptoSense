@@ -55,12 +55,17 @@ export async function apiFetch<TResponse = void>(
 
 	const url = buildURL(path, options.query);
 
-	const response = await fetch(url, {
+	const fetchInit: RequestInit = {
 		method,
 		headers,
-		body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
 		credentials: 'include',
-	});
+	};
+
+	if (options.body !== undefined) {
+		fetchInit.body = JSON.stringify(options.body);
+	}
+
+	const response = await fetch(url, fetchInit);
 
 	const newToken = response.headers.get(ACCESS_TOKEN_HEADER);
 	if (newToken) {

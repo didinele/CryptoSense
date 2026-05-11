@@ -6,3 +6,5 @@ export { registerSchema, registerRoute } from './routes/auth/register.js';
 export { loginSchema, loginRoute } from './routes/auth/login.js';
 export { logoutRoute } from './routes/auth/logout.js';
 export { meSchema, meRoute } from './routes/auth/me.js';
+
+export { analyzeSymbolSchema, analyzeSymbolRoute } from './routes/market/analysis.js';

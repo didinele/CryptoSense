@@ -1,7 +1,7 @@
 import type { ServerResponse as Response } from 'node:http';
 import db from '@cryptosense/db';
 import { unauthorized } from '@hapi/boom';
-import cookie from 'cookie';
+import { parse as parseCookie } from 'cookie';
 import type { Request } from 'polka';
 import { defineMiddleware } from '../core/route.js';
 import {
@@ -43,7 +43,7 @@ async function tryResolveUser(req: Request, res: Response): Promise<RequestIdent
 	}
 
 	// 2. Try the refresh token from the cookie
-	const cookies = cookie.parse(req.headers.cookie ?? '');
+	const cookies = parseCookie(req.headers.cookie ?? '');
 	const refreshToken = cookies[REFRESH_COOKIE];
 
 	if (refreshToken) {

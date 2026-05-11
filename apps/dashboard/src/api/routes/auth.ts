@@ -15,7 +15,7 @@ export type RegisterBody = RegisterContract['body'];
 export type LoginBody = LoginContract['body'];
 
 export const me = {
-	queryKey: () => queryKeys.auth.me,
+	queryKey: queryKeys.auth.me,
 	queryFn: async (): Promise<MeResponse> => apiFetch<MeResponse>('get', '/api/v1/auth/me'),
 };
 

@@ -7,12 +7,12 @@ import { defineRoute } from '../../core/route.js';
 
 export const registerSchema = {
 	body: z.object({
-		email: z.string().email().min(3).max(255),
+		username: z.string().min(3).max(255),
 		password: z.string().min(8).max(255),
 	}),
 	response: z.object({
 		id: z.number(),
-		email: z.string(),
+		username: z.string(),
 	}),
 };
 
@@ -21,12 +21,12 @@ export const registerRoute = defineRoute({
 	path: '/api/v1/auth/register',
 	schema: registerSchema,
 	async handler(req, res) {
-		const { email, password } = req.body;
+		const { username, password } = req.body;
 
 		// Check if user exists
-		const [existing] = await db`SELECT id FROM users WHERE email = ${email}`;
+		const [existing] = await db`SELECT id FROM users WHERE username = ${username}`;
 		if (existing) {
-			throw conflict('Email is already taken');
+			throw conflict('Username is already taken');
 		}
 
 		// Hash password
@@ -34,9 +34,9 @@ export const registerRoute = defineRoute({
 
 		// Insert user
 		const [user] = await db`
-			INSERT INTO users (email, password_hash)
-			VALUES (${email}, ${passwordHash})
-			RETURNING id, email
+			INSERT INTO users (username, password_hash)
+			VALUES (${username}, ${passwordHash})
+			RETURNING id, username
 		`;
 
 		const accountId = user!['id'];
@@ -47,7 +47,7 @@ export const registerRoute = defineRoute({
 
 		return {
 			id: accountId,
-			email: user!['email'],
+			username: user!['username'],
 		};
 	},
 });
