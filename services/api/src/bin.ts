@@ -1,5 +1,6 @@
 import { mountRoute, startServer } from './core/server.js';
 import { startMarketSyncCron } from './jobs/marketSync.js';
+import { startNewsSyncCron } from './jobs/newsSync.js';
 import { loginRoute } from './routes/auth/login.js';
 import { logoutRoute } from './routes/auth/logout.js';
 import { meRoute } from './routes/auth/me.js';
@@ -20,3 +21,4 @@ mountRoute(feedbackRoute);
 
 startServer();
 startMarketSyncCron();
+startNewsSyncCron();

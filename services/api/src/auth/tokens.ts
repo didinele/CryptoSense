@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/dot-notation */
+ 
 
 import type { ServerResponse as Response } from 'node:http';
 import process from 'node:process';

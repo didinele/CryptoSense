@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { APIError } from '@/api/error';
 import { useAnalyzeSymbol, type AnalysisData } from '@/api/routes/analysis';
 import { useMe, useLogout } from '@/api/routes/auth';
 import { useSubmitFeedback } from '@/api/routes/feedback';
@@ -163,9 +164,17 @@ export default function DashboardPage() {
 					</div>
 
 					{sentimentError && (
-						<div className="rounded border border-red-700/50 bg-red-900/50 p-4 text-red-200">
-							❌ Failed fetching sentiment: {(sentimentError as any).message || 'Server Error'}
-						</div>
+						sentimentError instanceof APIError && sentimentError.statusCode === 404
+							? (
+								<div className="rounded border border-blue-700/50 bg-blue-900/20 p-4 text-blue-300">
+									News data for this coin is still being collected. Check back in a few minutes.
+								</div>
+							)
+							: (
+								<div className="rounded border border-red-700/50 bg-red-900/50 p-4 text-red-200">
+									❌ Failed fetching sentiment: {(sentimentError as any).message || 'Server Error'}
+								</div>
+							)
 					)}
 
 					{sentimentData && (

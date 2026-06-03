@@ -11,8 +11,9 @@ export async function syncMarketData() {
 		// Fetch data from Binance for target symbols
 		const responses = await Promise.all(
 			SYMBOLS.map(async (symbol) =>
-				fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`)
-					.then(async (res) => res.json() as Promise<{ price: string, symbol: string; }>),
+				fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`).then(
+					async (res) => res.json() as Promise<{ price: string; symbol: string }>,
+				),
 			),
 		);
 
@@ -40,9 +41,9 @@ export function startMarketSyncCron() {
 	cron.schedule('*/5 * * * *', () => {
 		void syncMarketData();
 	});
-	
+
 	console.log('> Market Sync Cron scheduled (every 5 minutes)');
-	
+
 	// Opțional: Facem și un prim sync imediat cum pornește serverul
 	void syncMarketData();
 }

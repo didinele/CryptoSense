@@ -1,3 +1,5 @@
+import db from '@cryptosense/db';
+import Boom from '@hapi/boom';
 import { z } from 'zod';
 import { runSentimentAgent, SentimentOutputSchema } from '../../ai/sentiment.js';
 import { requireAuth } from '../../auth/middleware.js';
@@ -10,17 +12,20 @@ export const sentimentSymbolSchema = {
 	response: SentimentOutputSchema,
 };
 
-// Mock function to simulate fetching recent news.
-// In a real scenario, this would call a News API like CryptoPanic or NewsAPI.
 async function fetchNewsForSymbol(symbol: string): Promise<string[]> {
-	// Fallback/mock news data based on the symbol
-	return [
-		`${symbol} sees massive surge in institutional adoption according to new reports.`,
-		`Regulatory concerns shadow ${symbol}'s recent price movements.`,
-		`New technological upgrades on the ${symbol} network expected next month.`,
-		`Market analysts predict a huge bull run for ${symbol} as volume spikes.`,
-		`Security breach in a major exchange negatively impacts ${symbol} sentiment.`,
-	];
+	const rows = await db<{ headline: string }[]>`
+		SELECT headline
+		FROM news_data
+		WHERE symbol = ${symbol}
+		ORDER BY published_at DESC NULLS LAST
+		LIMIT 10
+	`;
+
+	if (rows.length === 0) {
+		throw Boom.notFound('No news data available yet for this symbol. Please wait for the news sync to complete.');
+	}
+
+	return rows.map((r) => r.headline);
 }
 
 export const sentimentSymbolRoute = defineRoute({
@@ -31,10 +36,8 @@ export const sentimentSymbolRoute = defineRoute({
 	async handler(req) {
 		const { symbol } = req.query;
 
-		// Fetch the latest news headlines for the given symbol
 		const newsHeadlines = await fetchNewsForSymbol(symbol);
 
-		// Rulăm AI Agent-ul peste titlurile de știri
 		return runSentimentAgent(symbol, newsHeadlines);
 	},
 });

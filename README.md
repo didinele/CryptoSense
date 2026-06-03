@@ -171,7 +171,7 @@ Sistemul nostru integrează 3 agenți specifici care reprezintă nucleul funcți
 
 ### Epic 4: Recomandări Strategice & Dashboard (Agentul Strateg)
 
-- [ ] **US 4.0: Generarea recomandării finale**
+- [x] **US 4.0: Generarea recomandării finale**
   - **Descriere:** Ca utilizator, vreau ca Agentul Strateg să îmi ofere o concluzie clară (Buy/Sell/Hold) bazată pe datele celorlalți doi agenți.
   - **Criterii de acceptare:** Agentul primește contextul complet și returnează un paragraf explicativ scurt, fără a inventa date (fără halucinații pe preț).
 - [~] **US 4.1: Dashboard centralizat** _(Parțial implementat)_
@@ -183,6 +183,6 @@ Sistemul nostru integrează 3 agenți specifici care reprezintă nucleul funcți
 - [x] **US 5.0: Evaluarea automată a halucinațiilor (Evals)**
   - **Descriere:** Ca dezvoltator, vreau un sistem automatizat care testează (evals) dacă Agentul / Sistemul recomandă corect pe baza unui set de date de test (mock data).
   - **Criterii de acceptare:** Există scripturi de test (`vitest`) scrise (`analyst.eval.test.ts`, `sentiment.eval.test.ts`) care validează formatul generat și fallback-urile non-LLM.
-- [ ] **US 5.1: Feedback utilizator (Human-in-the-loop)**
+- [x] **US 5.1: Feedback utilizator (Human-in-the-loop)**
   - **Descriere:** Ca utilizator, vreau să pot evalua recomandarea Agentului Strateg (Thumbs Up/Down) pentru a marca dacă a fost utilă.
   - **Criterii de acceptare:** Butoanele de feedback salvează răspunsul în baza de date pentru raportarea calității AI-ului.
