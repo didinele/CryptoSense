@@ -144,9 +144,9 @@ Sistemul nostru integrează 3 agenți specifici care reprezintă nucleul funcți
 - [x] **US 1.1: Sincronizare date de piață**
   - **Descriere:** Ca sistem, trebuie să preiau date de preț în timp real (via API public, ex: Binance/CoinGecko) pentru a alimenta Agentul Analist.
   - **Criterii de acceptare:** Datele sunt aduse și salvate în DB la un interval regulat (cron job).
-- [ ] **US 1.2: Configurare portofoliu (Watchlist)** _(Backlog / Tehnic)_
-  - **Descriere:** Ca utilizator, vreau să îmi pot alege monedele pe care le urmăresc, în loc ca sistemul să folosească o listă hardcodată.
-  - **Criterii de acceptare:** DB extins cu un tabel `user_watchlists`, iar dashboard-ul permite adăugarea/ștergerea simbolurilor.
+- [x] **US 1.2: Configurare perechi urmărite (Tracked Pairs)**
+  - **Descriere:** Ca utilizator, vreau să îmi pot alege perechile de tranzacționare pe care le urmăresc, în loc ca sistemul să folosească o listă hardcodată.
+  - **Criterii de acceptare:** DB extins cu un tabel `user_symbols`; dashboard-ul permite adăugarea (cu validare Binance) și ștergerea simbolurilor; cron job-urile de sync folosesc lista agregată din DB.
 
 ### Epic 2: Analiză Tehnică (Agentul Analist)
 
@@ -165,9 +165,9 @@ Sistemul nostru integrează 3 agenți specifici care reprezintă nucleul funcți
 - [x] **US 3.1: Scorul de Sentiment Agregat**
   - **Descriere:** Ca trader, vreau să văd un "Scor de Sentiment" (0-100) pentru a înțelege rapid panica sau euforia generală.
   - **Criterii de acceptare:** Afișarea grafică a scorului sub formă de progres/gauge pe pagina principală.
-- [ ] **US 3.2: Integrare flux real de știri (News API)** _(Backlog / Tehnic)_
-  - **Descriere:** Ca sistem, doresc să preiau știri financiare din surse reale (ex: CryptoPanic, NewsAPI) în detrimentul array-ului curent de mock/hardcodat.
-  - **Criterii de acceptare:** Agentul de sentiment înghite feed-urile externe parzate în timp real în loc de funcția mock.
+- [x] **US 3.2: Integrare flux real de știri (RSS)**
+  - **Descriere:** Ca sistem, preiau știri financiare din surse reale (CoinDesk, CoinTelegraph, Decrypt) în detrimentul array-ului curent de mock/hardcodat.
+  - **Criterii de acceptare:** Cron job sincronizează articole RSS la fiecare 15 minute, filtrează după ticker-ul urmărit și le stochează în DB; agentul de sentiment citește din DB în loc de mock.
 
 ### Epic 4: Recomandări Strategice & Dashboard (Agentul Strateg)
 

@@ -1,24 +1,42 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { APIError } from '@/api/error';
 import { useAnalyzeSymbol, type AnalysisData } from '@/api/routes/analysis';
 import { useMe, useLogout } from '@/api/routes/auth';
 import { useSubmitFeedback } from '@/api/routes/feedback';
 import { useSentimentSymbol, type SentimentData } from '@/api/routes/sentiment';
 import { useStrategist } from '@/api/routes/strategy';
+import { useGetUserSymbols, useAddUserSymbol, useRemoveUserSymbol } from '@/api/routes/userSymbols';
 
 export default function DashboardPage() {
 	const { data: user, isLoading, isError, isFetching } = useMe();
 	const logout = useLogout();
 	const router = useRouter();
 
+	const { data: symbolsData, isLoading: isLoadingSymbols } = useGetUserSymbols();
+	const addSymbol = useAddUserSymbol();
+	const removeSymbol = useRemoveUserSymbol();
+	const [newSymbolInput, setNewSymbolInput] = useState('');
+
+	const trackedSymbols = useMemo(() => symbolsData?.symbols ?? [], [symbolsData]);
+
 	const strategist = useStrategist();
 	const submitFeedback = useSubmitFeedback();
 	const [feedbackGiven, setFeedbackGiven] = useState<'negative' | 'positive' | null>(null);
 
-	const [symbol, setSymbol] = useState('BTCUSDT');
+	const [symbol, setSymbol] = useState('');
+
+	// Keep selected symbol in sync when the list changes
+	useEffect(() => {
+		if (trackedSymbols.length > 0 && !trackedSymbols.includes(symbol)) {
+			setSymbol(trackedSymbols[0]!);
+		} else if (trackedSymbols.length === 0) {
+			setSymbol('');
+		}
+	}, [trackedSymbols, symbol]);
+
 	const {
 		data: rawAnalysis,
 		isLoading: isAnalyzing,
@@ -46,13 +64,22 @@ export default function DashboardPage() {
 		router.push('/login');
 	};
 
+	const handleAddSymbol = async () => {
+		const value = newSymbolInput.trim().toUpperCase();
+		if (!value) return;
+		await addSymbol.mutateAsync(value);
+		setNewSymbolInput('');
+	};
+
 	if (isLoading) {
 		return <div className="p-8 text-white">Loading...</div>;
 	}
 
 	if (!user) {
-		return null; // Will redirect
+		return null;
 	}
+
+	const noSymbols = !isLoadingSymbols && trackedSymbols.length === 0;
 
 	return (
 		<div className="min-h-screen bg-gray-900 p-8 text-white">
@@ -70,39 +97,91 @@ export default function DashboardPage() {
 					</div>
 				</div>
 
+				{/* Tracked Pairs */}
 				<div className="rounded-lg bg-gray-800 p-6 shadow-md">
-					<div className="mb-4 flex items-center justify-between">
-						<h2 className="text-xl font-semibold">Market Data Sync</h2>
-					</div>
-					<p className="text-gray-300">
-						Data is being fetched real-time from Binance API in background (Every 5 minutes).
-					</p>
+					<h2 className="mb-4 text-xl font-semibold">Tracked Pairs</h2>
+
+					{isLoadingSymbols ? (
+						<p className="text-sm text-gray-400">Loading...</p>
+					) : (
+						<>
+							{trackedSymbols.length > 0 ? (
+								<div className="mb-4 flex flex-wrap gap-2">
+									{trackedSymbols.map((s) => (
+										<span
+											className="flex items-center gap-2 rounded-full bg-gray-700 px-3 py-1 text-sm font-medium"
+											key={s}
+										>
+											{s}
+											<button
+												className="text-gray-400 hover:text-red-400 disabled:opacity-40"
+												disabled={removeSymbol.isPending}
+												onClick={() => removeSymbol.mutate(s)}
+											>
+												✕
+											</button>
+										</span>
+									))}
+								</div>
+							) : (
+								<p className="mb-4 text-sm text-gray-400 italic">No pairs tracked yet. Add one below to get started.</p>
+							)}
+
+							<div className="flex gap-2">
+								<input
+									className="flex-1 rounded bg-gray-700 px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:ring-1 focus:ring-blue-500"
+									disabled={addSymbol.isPending}
+									onChange={(e) => setNewSymbolInput(e.target.value)}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter') void handleAddSymbol();
+									}}
+									placeholder="e.g. DOGEUSDT"
+									value={newSymbolInput}
+								/>
+								<button
+									className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold hover:bg-blue-500 disabled:opacity-50"
+									disabled={addSymbol.isPending || !newSymbolInput.trim()}
+									onClick={() => void handleAddSymbol()}
+								>
+									{addSymbol.isPending ? 'Adding...' : 'Add Pair'}
+								</button>
+							</div>
+
+							{addSymbol.error && (
+								<p className="mt-2 text-sm text-red-400">{(addSymbol.error as any).message || 'Failed to add pair.'}</p>
+							)}
+						</>
+					)}
 				</div>
 
+				{/* Analyst Agent */}
 				<div className="mt-6 rounded-lg bg-gray-800 p-6 shadow-md">
 					<div className="mb-4 flex items-center justify-between">
 						<h2 className="text-xl font-semibold">Analyst Agent (AI)</h2>
 						<div className="flex gap-2">
 							<select
-								className="rounded bg-gray-700 px-3 py-1 text-sm text-white outline-none"
+								className="rounded bg-gray-700 px-3 py-1 text-sm text-white outline-none disabled:opacity-50"
+								disabled={noSymbols}
 								onChange={(e) => setSymbol(e.target.value)}
 								value={symbol}
 							>
-								<option value="BTCUSDT">BTC/USDT</option>
-								<option value="ETHUSDT">ETH/USDT</option>
-								<option value="SOLUSDT">SOL/USDT</option>
-								<option value="BNBUSDT">BNB/USDT</option>
-								<option value="ADAUSDT">ADA/USDT</option>
+								{trackedSymbols.map((s) => (
+									<option key={s} value={s}>
+										{s.replace('USDT', '/USDT')}
+									</option>
+								))}
 							</select>
 							<button
 								className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold hover:bg-blue-500 disabled:opacity-50"
-								disabled={isAnalyzing}
+								disabled={isAnalyzing || noSymbols}
 								onClick={() => runAnalysis()}
 							>
 								{isAnalyzing ? 'Thinking (Local LLM)...' : 'Run Analysis'}
 							</button>
 						</div>
 					</div>
+
+					{noSymbols && <p className="text-sm text-gray-400 italic">Add a tracked pair above to run analysis.</p>}
 
 					{analyzeError && (
 						<div className="rounded border border-red-700/50 bg-red-900/50 p-4 text-red-200">
@@ -151,31 +230,31 @@ export default function DashboardPage() {
 					)}
 				</div>
 
+				{/* Sentiment */}
 				<div className="mt-6 rounded-lg bg-gray-800 p-6 shadow-md">
 					<div className="mb-4 flex items-center justify-between">
 						<h2 className="text-xl font-semibold">AI Sentiment Analysis</h2>
 						<button
 							className="rounded bg-purple-600 px-4 py-2 text-sm font-semibold hover:bg-purple-500 disabled:opacity-50"
-							disabled={isAnalyzingSentiment}
+							disabled={isAnalyzingSentiment || noSymbols}
 							onClick={() => runSentiment()}
 						>
 							{isAnalyzingSentiment ? 'Reading News (LLM)...' : 'Analyze News'}
 						</button>
 					</div>
 
-					{sentimentError && (
-						sentimentError instanceof APIError && sentimentError.statusCode === 404
-							? (
-								<div className="rounded border border-blue-700/50 bg-blue-900/20 p-4 text-blue-300">
-									News data for this coin is still being collected. Check back in a few minutes.
-								</div>
-							)
-							: (
-								<div className="rounded border border-red-700/50 bg-red-900/50 p-4 text-red-200">
-									❌ Failed fetching sentiment: {(sentimentError as any).message || 'Server Error'}
-								</div>
-							)
-					)}
+					{noSymbols && <p className="text-sm text-gray-400 italic">Add a tracked pair above to analyze sentiment.</p>}
+
+					{sentimentError &&
+						(sentimentError instanceof APIError && sentimentError.statusCode === 404 ? (
+							<div className="rounded border border-blue-700/50 bg-blue-900/20 p-4 text-blue-300">
+								News data for this coin is still being collected. Check back in a few minutes.
+							</div>
+						) : (
+							<div className="rounded border border-red-700/50 bg-red-900/50 p-4 text-red-200">
+								❌ Failed fetching sentiment: {(sentimentError as any).message || 'Server Error'}
+							</div>
+						))}
 
 					{sentimentData && (
 						<div className="mt-4 space-y-6">
@@ -201,7 +280,7 @@ export default function DashboardPage() {
 									</div>
 								</div>
 
-								<div className="min-w-[120px] rounded bg-gray-700 p-4 text-center">
+								<div className="min-w-30 rounded bg-gray-700 p-4 text-center">
 									<p className="text-xs tracking-wider text-gray-400 uppercase">Overall</p>
 									<p
 										className={`text-xl font-bold capitalize ${
@@ -242,6 +321,7 @@ export default function DashboardPage() {
 					)}
 				</div>
 
+				{/* Strategy */}
 				<div className="mt-6 mb-12 rounded-lg border border-teal-500/30 bg-teal-900/30 p-6 shadow-md">
 					<div className="mb-4 flex items-center justify-between">
 						<h2 className="text-xl font-semibold text-teal-300">Strategy AI (Decision Maker)</h2>
@@ -338,9 +418,7 @@ export default function DashboardPage() {
 										👎 Not helpful
 									</button>
 								</div>
-								{feedbackGiven && (
-									<p className="text-xs text-gray-500">Thanks for your feedback!</p>
-								)}
+								{feedbackGiven && <p className="text-xs text-gray-500">Thanks for your feedback!</p>}
 							</div>
 						</div>
 					)}

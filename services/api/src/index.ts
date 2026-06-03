@@ -11,3 +11,7 @@ export { analyzeSymbolSchema, analyzeSymbolRoute } from './routes/market/analysi
 export { sentimentSymbolSchema, sentimentSymbolRoute } from './routes/market/sentiment.js';
 export { strategySchema, strategyRoute } from './routes/market/strategy.js';
 export { feedbackSchema, feedbackRoute } from './routes/market/feedback.js';
+
+export { getUserSymbolsSchema, getUserSymbolsRoute } from './routes/user/symbols.js';
+export { addUserSymbolSchema, addUserSymbolRoute } from './routes/user/symbols.js';
+export { removeUserSymbolSchema, removeUserSymbolRoute } from './routes/user/symbols.js';

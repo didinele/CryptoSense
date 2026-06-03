@@ -1,16 +1,23 @@
 import db from '@cryptosense/db';
 import cron from 'node-cron';
 
-// Target symbols to sync from Binance
-const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'ADAUSDT'];
+async function getTrackedSymbols(): Promise<string[]> {
+	const rows = await db<{ symbol: string }[]>`SELECT DISTINCT symbol FROM user_symbols`;
+	return rows.map((r) => r.symbol);
+}
 
 export async function syncMarketData() {
 	let syncedCount = 0;
 	try {
-		console.log('[Cron] Fetching market data from Binance...');
-		// Fetch data from Binance for target symbols
+		const symbols = await getTrackedSymbols();
+		if (symbols.length === 0) {
+			console.log('[Cron] No tracked symbols, skipping market sync.');
+			return;
+		}
+
+		console.log(`[Cron] Fetching market data from Binance for ${symbols.join(', ')}...`);
 		const responses = await Promise.all(
-			SYMBOLS.map(async (symbol) =>
+			symbols.map(async (symbol) =>
 				fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`).then(
 					async (res) => res.json() as Promise<{ price: string; symbol: string }>,
 				),
@@ -19,7 +26,6 @@ export async function syncMarketData() {
 
 		const timestamp = Date.now();
 
-		// Insert into the database
 		for (const data of responses) {
 			if (data.symbol && data.price) {
 				await db`
@@ -37,13 +43,10 @@ export async function syncMarketData() {
 }
 
 export function startMarketSyncCron() {
-	// Rulează la fiecare 5 minute
 	cron.schedule('*/5 * * * *', () => {
 		void syncMarketData();
 	});
 
 	console.log('> Market Sync Cron scheduled (every 5 minutes)');
-
-	// Opțional: Facem și un prim sync imediat cum pornește serverul
 	void syncMarketData();
 }

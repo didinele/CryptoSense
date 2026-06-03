@@ -8,36 +8,47 @@ const RSS_FEEDS = [
 	{ url: 'https://decrypt.co/feed', source: 'Decrypt' },
 ];
 
-// Keywords used to assign articles to trading pair symbols
-const SYMBOL_KEYWORDS: Record<string, string[]> = {
-	BTCUSDT: ['bitcoin', 'btc'],
-	ETHUSDT: ['ethereum', 'eth'],
-	SOLUSDT: ['solana', 'sol'],
-	BNBUSDT: ['bnb', 'binance coin'],
-	ADAUSDT: ['cardano', 'ada'],
-};
+// Strip quote currency to get the base ticker (e.g. BTCUSDT → btc, DOGEUSDT → doge)
+const QUOTE_CURRENCIES = ['USDT', 'BUSD', 'USDC', 'BTC', 'ETH', 'BNB'];
+
+function deriveKeywords(symbol: string): string[] {
+	for (const quote of QUOTE_CURRENCIES) {
+		if (symbol.endsWith(quote)) {
+			return [symbol.slice(0, -quote.length).toLowerCase()];
+		}
+	}
+
+	return [symbol.toLowerCase()];
+}
+
+async function getTrackedSymbols(): Promise<Map<string, string[]>> {
+	const rows = await db<{ symbol: string }[]>`SELECT DISTINCT symbol FROM user_symbols`;
+	return new Map(rows.map((r) => [r.symbol, deriveKeywords(r.symbol)]));
+}
 
 const parser = new Parser({ timeout: 10_000 });
 
-function matchingSymbols(title: string): string[] {
+function matchingSymbols(title: string, symbolKeywords: Map<string, string[]>): string[] {
 	const lower = title.toLowerCase();
-	return Object.entries(SYMBOL_KEYWORDS)
+	return [...symbolKeywords.entries()]
 		.filter(([, keywords]) => keywords.some((kw) => lower.includes(kw)))
 		.map(([symbol]) => symbol);
 }
 
-async function fetchFeed(feedUrl: string): Promise<Parser.Output<Record<string, unknown>>> {
-	return parser.parseURL(feedUrl);
-}
-
 export async function syncNews(): Promise<void> {
+	const symbolKeywords = await getTrackedSymbols();
+	if (symbolKeywords.size === 0) {
+		console.log('[NewsSync] No tracked symbols, skipping news sync.');
+		return;
+	}
+
 	console.log('[NewsSync] Fetching crypto news from RSS feeds...');
 	let totalInserted = 0;
 
 	for (const { url: feedUrl, source } of RSS_FEEDS) {
 		let feed: Parser.Output<Record<string, unknown>>;
 		try {
-			feed = await fetchFeed(feedUrl);
+			feed = await parser.parseURL(feedUrl);
 		} catch (error) {
 			console.error(`[NewsSync] Failed to fetch RSS feed ${source}:`, error);
 			continue;
@@ -50,7 +61,7 @@ export async function syncNews(): Promise<void> {
 
 			if (!headline) continue;
 
-			const symbols = matchingSymbols(headline);
+			const symbols = matchingSymbols(headline, symbolKeywords);
 			if (symbols.length === 0) continue;
 
 			for (const symbol of symbols) {
@@ -68,7 +79,6 @@ export async function syncNews(): Promise<void> {
 		}
 	}
 
-	// Prune articles older than 7 days
 	await db`DELETE FROM news_data WHERE published_at < NOW() - INTERVAL '7 days'`;
 
 	console.log(`[NewsSync] Done. Inserted ${totalInserted} new articles.`);
