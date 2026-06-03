@@ -5,3 +5,4 @@ dist
 .yarn/*
 !.yarn/releases
 .env
+tsconfig.tsbuildinfo

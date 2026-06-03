@@ -1,4 +1,4 @@
- 
+/* eslint-disable @typescript-eslint/dot-notation */
 
 import type { ServerResponse as Response } from 'node:http';
 import process from 'node:process';
@@ -55,7 +55,7 @@ export function setRefreshCookie(res: Response, token: string): void {
 	setCookie(res, REFRESH_COOKIE, token, {
 		httpOnly: true,
 		maxAge: THIRTY_DAYS_MS / 1_000,
-		path: '/api/v1/auth',
+		path: '/api/v1',
 		sameSite: isProd ? 'strict' : 'lax',
 		secure: isProd,
 	});
@@ -65,7 +65,7 @@ export function clearRefreshCookie(res: Response): void {
 	const isProd = process.env['NODE_ENV'] === 'production';
 	clearCookie(res, REFRESH_COOKIE, {
 		httpOnly: true,
-		path: '/api/v1/auth',
+		path: '/api/v1',
 		sameSite: isProd ? 'strict' : 'lax',
 		secure: isProd,
 	});

@@ -1,8 +1,17 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useMe } from '@/api/routes/auth';
+
 export default function Home() {
-	return (
-		<main className="flex min-h-screen flex-col items-center justify-center p-24">
-			<h1 className="text-4xl font-bold">Dashboard</h1>
-			<p className="mt-4 text-lg text-gray-600">Skeleton successfully initialized.</p>
-		</main>
-	);
+	const { data: user, isError, isFetching } = useMe();
+	const router = useRouter();
+
+	useEffect(() => {
+		if (isFetching) return;
+		router.replace(user ? '/dashboard' : '/login');
+	}, [user, isError, isFetching, router]);
+
+	return null;
 }
