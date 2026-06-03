@@ -35,21 +35,21 @@ The codebase is built as a scalable full-stack Node.js/TypeScript monorepo using
 
 ## ✅ MDS Grading Backlog & Criteria
 
-- [ ] **User Stories & Backlog (minim 10):** _[Link to GitHub Projects / Issues]_
-- [ ] **Diagrame (UML, architecture, workflows):** _[Link to diagrams]_
+- [x] **User Stories & Backlog (minim 10):** 12 user stories documentate în secțiunea Product Backlog de mai jos.
+- [x] **Diagrame (UML, architecture, workflows):** Diagrame Mermaid inline (componente & pachete, flow decizional) — vezi secțiunea Arhitectura de mai jos.
 - [x] **Source control cu Git:** Branching, PRs, and commits actively maintained.
 - [x] **Teste automate (inclusiv evals pt agenți):** Vitest configured across all packages and services.
 - [ ] **Raportare bug și rezolvare cu PR:** _[Link to tracked bugs/PRs]_
 - [x] **Pipeline CI/CD:** Defined in `.github/workflows/ci.yml` (Build, Lint, Test).
 - [ ] **Raport utilizare tooluri AI:** _[Link to AI usage report document]_
-- [x] **Integrare minim 2 Agenți AI:** Sistemul folosește Agentul Analist și cel de Sentiment (prin Ollama/fallback algoritmic).
+- [x] **Integrare minim 2 Agenți AI:** 3 agenți — Analist Tehnic, Sentiment, Strategist — rulând pe Ollama/fallback algoritmic.
 - [ ] **Live Demo / Offline Screencast:** _[Link to YouTube / Demo]_
 
 ### Integrare Minim 2 Agenți AI 🤖
 
-- **Analistul Tehnic**: Folosește prețurile din ultimele zile, calculează variații procentuale și emite un semnal + explicație pe zona tehnică.
-- **Analistul de Sentiment**: Citește o listă de articole/stiri mockuite și atribuie automat `positive`, `negative`, sau `neutral` per headline, generând și un verdict general (Aggregate Score + Sentiment Text).
-- **Strategistul (Decidentul Final)**: Așteaptă datele de la ambii sub-agenți de mai sus. Primește JSON-ul cu detaliile tehnice + contextul știrilor pe acel Symbol, apoi decide strategia finală (`BUY` / `HOLD` / `SELL`) alături de o estimare a încrederii.
+- **Analistul Tehnic**: Citește ultimele 50 de prețuri din DB (sincronizate live de pe Binance), calculează trend, suport, rezistență și emite un semnal + explicație pe zona tehnică.
+- **Analistul de Sentiment**: Citește titlurile de știri colectate în timp real din feed-uri RSS (CoinDesk, CoinTelegraph, Decrypt) și atribuie automat `positive`, `negative`, sau `neutral` per headline, generând un Aggregate Score (0-100) + verdict general.
+- **Strategistul (Decidentul Final)**: Primește output-ul de la ambii agenți de mai sus și decide strategia finală (`BUY` / `HOLD` / `SELL`) alături de un nivel de încredere și o explicație în limbaj natural.
 
 ---
 
@@ -98,7 +98,7 @@ sequenceDiagram
     API-->>Frontend: Trimite `AnalysisData`
 
     Frontend->>API: POST /api/v1/market/sentiment
-    API->>AI_Sentiment: Query LLM pe lista de știri mock
+    API->>AI_Sentiment: Query LLM pe știrile din DB (RSS sync)
     AI_Sentiment-->>API: Returnează JSON (Polarity, Aggregate)
     API-->>Frontend: Trimite `SentimentData`
 
