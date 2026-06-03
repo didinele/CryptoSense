@@ -174,9 +174,9 @@ Sistemul nostru integrează 3 agenți specifici care reprezintă nucleul funcți
 - [x] **US 4.0: Generarea recomandării finale**
   - **Descriere:** Ca utilizator, vreau ca Agentul Strateg să îmi ofere o concluzie clară (Buy/Sell/Hold) bazată pe datele celorlalți doi agenți.
   - **Criterii de acceptare:** Agentul primește contextul complet și returnează un paragraf explicativ scurt, fără a inventa date (fără halucinații pe preț).
-- [~] **US 4.1: Dashboard centralizat** _(Parțial implementat)_
+- [x] **US 4.1: Dashboard centralizat**
   - **Descriere:** Ca utilizator, vreau un panou principal unde să vizualizez prețul curent, scorul de sentiment și recomandarea AI simultan.
-  - **Criterii de acceptare:** Interfață responsivă cu 3 secțiuni distincte, populate asincron. (Layout-ul HTML și agenții 1 & 2 există, lipsește UI-ul pentru Strategist).
+  - **Criterii de acceptare:** Interfață responsivă cu 3 secțiuni distincte (Price Analysis, News Sentiment, Trade Strategy), populate asincron printr-un singur buton "Analyze"; cei trei agenți rulează în pipeline (analiză + sentiment în paralel, strategie automat după).
 
 ### Epic 5: Evals & Calitatea Sistemului AI
 

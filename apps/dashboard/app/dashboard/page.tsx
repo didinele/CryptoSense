@@ -67,6 +67,7 @@ export default function DashboardPage() {
 	const handleAnalyze = async () => {
 		setPipelinePhase('analyzing');
 		setFeedbackGiven(null);
+		strategist.reset();
 
 		const [analysisResult, sentimentResult] = await Promise.all([runAnalysis(), runSentiment()]);
 
