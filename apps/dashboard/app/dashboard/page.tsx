@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAnalyzeSymbol, type AnalysisData } from '@/api/routes/analysis';
 import { useMe, useLogout } from '@/api/routes/auth';
+import { useSubmitFeedback } from '@/api/routes/feedback';
 import { useSentimentSymbol, type SentimentData } from '@/api/routes/sentiment';
 import { useStrategist } from '@/api/routes/strategy';
 
@@ -13,6 +14,8 @@ export default function DashboardPage() {
 	const router = useRouter();
 
 	const strategist = useStrategist();
+	const submitFeedback = useSubmitFeedback();
+	const [feedbackGiven, setFeedbackGiven] = useState<'negative' | 'positive' | null>(null);
 
 	const [symbol, setSymbol] = useState('BTCUSDT');
 	const {
@@ -238,6 +241,7 @@ export default function DashboardPage() {
 							disabled={!analysis || !sentimentData || strategist.isPending}
 							onClick={() => {
 								if (analysis && sentimentData) {
+									setFeedbackGiven(null);
 									strategist.mutate({
 										symbol,
 										analystData: analysis,
@@ -283,6 +287,51 @@ export default function DashboardPage() {
 
 							<div className="w-full max-w-2xl text-center">
 								<p className="text-lg leading-relaxed text-gray-300 italic">"{strategist.data.explanation}"</p>
+							</div>
+
+							<div className="mt-6 flex flex-col items-center gap-2">
+								<p className="text-xs tracking-wider text-gray-500 uppercase">Was this recommendation helpful?</p>
+								<div className="flex gap-3">
+									<button
+										className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${
+											feedbackGiven === 'positive'
+												? 'bg-green-500 text-white'
+												: 'bg-gray-700 text-gray-300 hover:bg-green-600 hover:text-white'
+										} disabled:cursor-not-allowed disabled:opacity-50`}
+										disabled={feedbackGiven !== null || submitFeedback.isPending}
+										onClick={() => {
+											setFeedbackGiven('positive');
+											submitFeedback.mutate({
+												symbol,
+												recommendation: strategist.data!.recommendation,
+												feedback: 'positive',
+											});
+										}}
+									>
+										👍 Helpful
+									</button>
+									<button
+										className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${
+											feedbackGiven === 'negative'
+												? 'bg-red-500 text-white'
+												: 'bg-gray-700 text-gray-300 hover:bg-red-600 hover:text-white'
+										} disabled:cursor-not-allowed disabled:opacity-50`}
+										disabled={feedbackGiven !== null || submitFeedback.isPending}
+										onClick={() => {
+											setFeedbackGiven('negative');
+											submitFeedback.mutate({
+												symbol,
+												recommendation: strategist.data!.recommendation,
+												feedback: 'negative',
+											});
+										}}
+									>
+										👎 Not helpful
+									</button>
+								</div>
+								{feedbackGiven && (
+									<p className="text-xs text-gray-500">Thanks for your feedback!</p>
+								)}
 							</div>
 						</div>
 					)}

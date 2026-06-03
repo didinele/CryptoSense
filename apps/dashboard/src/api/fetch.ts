@@ -30,8 +30,10 @@ function buildURL(path: string, query?: FetchOptions['query']): string {
 async function parseError(response: Response): Promise<APIError> {
 	let message = response.statusText || 'Unknown Error';
 	try {
-		const data = (await response.json()) as { message?: string };
-		if (data.message) {
+		const data = (await response.json()) as { message?: { message: string; path?: string[] }[] | string };
+		if (Array.isArray(data.message)) {
+			message = data.message.map((issue) => issue.path?.length ? `${issue.path.join('.')}: ${issue.message}` : issue.message).join('; ');
+		} else if (data.message) {
 			message = data.message;
 		}
 	} catch {
