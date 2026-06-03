@@ -10,6 +10,7 @@ services:
     environment:
       PORT: 3001
       DATABASE_URL: postgres://postgres:postgres@db:5432/cryptosense
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
     ports:
       - '3001:3001'
     depends_on:

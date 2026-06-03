@@ -32,7 +32,7 @@ export function useRegister(options?: { onSuccess?(): void }) {
 	return useMutation({
 		mutationFn: async (body: RegisterBody) => apiFetch<RegisterContract['response']>('post', '/api/v1/auth/register', { body }),
 		onSuccess: () => {
-			void queryClient.invalidateQueries({ queryKey: queryKeys.auth.me });
+			void queryClient.resetQueries({ queryKey: queryKeys.auth.me });
 			options?.onSuccess?.();
 		},
 	});
@@ -44,7 +44,7 @@ export function useLogin(options?: { onSuccess?(): void }) {
 	return useMutation({
 		mutationFn: async (body: LoginBody) => apiFetch<LoginContract['response']>('post', '/api/v1/auth/login', { body }),
 		onSuccess: () => {
-			void queryClient.invalidateQueries({ queryKey: queryKeys.auth.me });
+			void queryClient.resetQueries({ queryKey: queryKeys.auth.me });
 			options?.onSuccess?.();
 		},
 	});

@@ -9,7 +9,7 @@ import { useSentimentSymbol, type SentimentData } from '@/api/routes/sentiment';
 import { useStrategist } from '@/api/routes/strategy';
 
 export default function DashboardPage() {
-	const { data: user, isLoading, isError } = useMe();
+	const { data: user, isLoading, isError, isFetching } = useMe();
 	const logout = useLogout();
 	const router = useRouter();
 
@@ -35,10 +35,10 @@ export default function DashboardPage() {
 	const sentimentData = rawSentiment as SentimentData | undefined;
 
 	useEffect(() => {
-		if (isError) {
+		if (!isFetching && isError) {
 			router.push('/login');
 		}
-	}, [isError, router]);
+	}, [isFetching, isError, router]);
 
 	const handleLogout = async () => {
 		await logout.mutateAsync();

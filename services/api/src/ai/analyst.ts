@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { setTimeout, clearTimeout } from 'node:timers';
 import { z } from 'zod';
 
@@ -45,7 +46,7 @@ export async function runAnalystAgent(symbol: string, prices: number[]): Promise
 		const controller = new AbortController();
 		const timeoutId = setTimeout(() => controller.abort(), 30_000); // 30 second timeout
 
-		const response = await fetch('http://localhost:11434/api/generate', {
+		const response = await fetch(`${process.env['OLLAMA_BASE_URL'] ?? 'http://localhost:11434'}/api/generate`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
