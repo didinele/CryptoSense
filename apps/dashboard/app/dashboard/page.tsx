@@ -46,7 +46,13 @@ export default function DashboardPage() {
 	const sentimentData = rawSentiment as SentimentData | undefined;
 
 	const strategist = useStrategist();
+	const { reset: resetStrategist } = strategist;
 	const submitFeedback = useSubmitFeedback();
+
+	useEffect(() => {
+		resetStrategist();
+		setFeedbackGiven(null);
+	}, [symbol, resetStrategist]);
 
 	useEffect(() => {
 		if (!isFetching && isError) router.push('/login');
@@ -172,8 +178,6 @@ export default function DashboardPage() {
 								disabled={isBusy}
 								onChange={(e) => {
 									setSymbol(e.target.value);
-									strategist.reset();
-									setFeedbackGiven(null);
 								}}
 								value={symbol}
 							>
