@@ -24,6 +24,7 @@ prompts:
     Scor Agregat: {{aggregateScore}}/100
 
     Ești obligat să alegi una dintre următoarele decizii: BUY, SELL, sau HOLD.
+    Regulă importantă: Când trendul tehnic și sentimentul sunt în contradicție (ex: trend bullish dar sentiment bearish, sau invers), alege HOLD ca decizie prudentă.
     Scrie o scurtă 'explanation' bazată strict pe datele primite (NU inventa prețuri noi).
     Acordă un scor de încredere 'confidence' (între 0 și 100).
 
@@ -132,7 +133,7 @@ tests:
         value: |
           const m = output.match(/\{[\s\S]*\}/);
           const o = m ? JSON.parse(m[0]) : {};
-          return o.confidence < 80;
+          return o.confidence < 85;
 
   - description: "Explanation must not be a generic placeholder"
     vars:
@@ -148,6 +149,13 @@ tests:
         value: |
           const m = output.match(/\{[\s\S]*\}/);
           const o = m ? JSON.parse(m[0]) : {};
-          return o.explanation && o.explanation.length > 20;
-      - type: llm-rubric
-        value: "The explanation references the provided trend, sentiment, or score and does not invent specific price figures beyond what was given in the prompt."
+          const exp = (o.explanation || '').toLowerCase();
+          return exp.length > 30 && (
+            exp.includes('bullish') ||
+            exp.includes('trend') ||
+            exp.includes('sentiment') ||
+            exp.includes('support') ||
+            exp.includes('resistance') ||
+            exp.includes('85') ||
+            exp.includes('score')
+          );

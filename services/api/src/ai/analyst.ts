@@ -23,13 +23,30 @@ export async function runAnalystAgent(symbol: string, prices: number[]): Promise
 	}
 
 	const prompt = `
-	Ești un analist tehnic crypto expert. 
+	Ești un analist tehnic crypto expert.
 	Analizează următoarele prețuri recente pentru ${symbol}: ${prices.join(', ')}.
 	Te rog să extragi nivelul de suport (cel mai mic punct recent), nivelul de rezistență (cel mai mare punct recent) și să declari un trend (bullish/bearish/neutral).
-	Dacă diferența procentuală DINTRE PRIMUL PREȚ ȘI ULTIMUL PREȚ din array depășește 5%, indiferent că este creștere sau scădere (volatilitate absolută), setează volatilityAlert la true și menționează volatilityPercentage NUMAI CA NUMĂR întreg sau floating point brut, FĂRĂ simbolul de procente. Fii extrem de atent la calcule matematice: (ultimul - primul)/primul * 100.
-	Dacă diferența procentuală ESTE MAI MICĂ de 5%, volatilityAlert = false și volatilityPercentage = 0.
-	
-	Răspunde STRICT folosind următoarea structură JSON, fără nimic altceva, folosind delimitatori:
+
+	CALCULUL VOLATILITĂȚII (urmează pașii în ordine):
+	Pasul 1: primul_pret = primul număr din array, ultimul_pret = ultimul număr din array.
+	Pasul 2: volatilityPercentage = ABS((ultimul_pret - primul_pret) / primul_pret * 100)
+	Pasul 3: Compară cu pragul de 5%:
+	  - DACĂ volatilityPercentage > 5 → volatilityAlert = true, păstrează valoarea calculată
+	  - DACĂ volatilityPercentage <= 5 → volatilityAlert = false, volatilityPercentage = 0
+
+	Exemplu corect pentru prețuri stabile [100, 101, 99, 100.5]:
+	  volatilityPercentage = ABS((100.5 - 100) / 100 * 100) = 0.5
+	  0.5 <= 5 → volatilityAlert = false, volatilityPercentage = 0
+
+	Exemplu corect pentru dump [100, 90, 85, 80]:
+	  volatilityPercentage = ABS((80 - 100) / 100 * 100) = ABS(-20) = 20
+	  20 > 5 → volatilityAlert = true, volatilityPercentage = 20
+
+	Exemplu corect pentru rally major [2000, 2300, 2500, 2700]:
+	  volatilityPercentage = ABS((2700 - 2000) / 2000 * 100) = ABS(700 / 2000 * 100) = ABS(35) = 35
+	  35 > 5 → volatilityAlert = true, volatilityPercentage = 35
+
+	Răspunde STRICT folosind următoarea structură JSON, fără nimic altceva:
 	{
 		"trend": "bullish" | "bearish" | "neutral",
 		"support": număr,

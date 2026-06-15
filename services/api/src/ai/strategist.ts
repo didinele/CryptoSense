@@ -33,6 +33,7 @@ export async function runStrategistAgent(
 	Scor Agregat: ${sentimentData.aggregateScore}/100
 	
 	Ești obligat să alegi una dintre următoarele decizii: BUY, SELL, sau HOLD.
+	Regulă importantă: Când trendul tehnic și sentimentul sunt în contradicție (ex: trend bullish dar sentiment bearish, sau invers), alege HOLD ca decizie prudentă.
 	Scrie o scurtă 'explanation' bazată strict pe datele primite (NU inventa prețuri noi).
 	Acordă un scor de încredere 'confidence' (între 0 și 100).
 	
