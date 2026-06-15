@@ -33,17 +33,10 @@ The codebase is built as a scalable full-stack Node.js/TypeScript monorepo using
 └── .github/            # CI/CD and AI Agent instructions
 ```
 
-## ✅ MDS Grading Backlog & Criteria
-
 - [x] **User Stories & Backlog (minim 10):** 12 user stories documentate în secțiunea Product Backlog de mai jos.
-- [x] **Diagrame (UML, architecture, workflows):** Diagrame Mermaid inline (componente & pachete, flow decizional) — vezi secțiunea Arhitectura de mai jos.
-- [x] **Source control cu Git:** Branching, PRs, and commits actively maintained.
-- [x] **Teste automate (inclusiv evals pt agenți):** Vitest configured across all packages and services.
-- [ ] **Raportare bug și rezolvare cu PR:** _[Link to tracked bugs/PRs]_
 - [x] **Pipeline CI/CD:** Defined in `.github/workflows/ci.yml` (Build, Lint, Test).
-- [ ] **Raport utilizare tooluri AI:** _[Link to AI usage report document]_
+- [x] **Raport utilizare tooluri AI:** [docs/ai-usage-report.md](docs/ai-usage-report.md)
 - [x] **Integrare minim 2 Agenți AI:** 3 agenți — Analist Tehnic, Sentiment, Strategist — rulând pe Ollama/fallback algoritmic.
-- [ ] **Live Demo / Offline Screencast:** _[Link to YouTube / Demo]_
 
 ### Integrare Minim 2 Agenți AI 🤖
 

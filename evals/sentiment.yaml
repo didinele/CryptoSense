@@ -1,0 +1,135 @@
+description: "Sentiment Agent Evals - News headline classification"
+
+evaluateOptions:
+  maxConcurrency: 1
+
+providers:
+  - id: openai:chat:llama3
+    config:
+      apiBaseUrl: "http://localhost:11434/v1"
+      apiKey: "ollama"
+
+prompts:
+  - |
+    Ești un analist financiar expert care analizează sentimentul știrilor despre criptomonede.
+    Următoarele sunt ultimele știri pentru moneda {{symbol}}:
+    {{headlines}}
+
+    Sarcini:
+    1. Clasifică polaritatea fiecărei știri (strict 'positive', 'negative' sau 'neutral').
+    2. Calculează un scor de sentiment agregat între 0 și 100, unde 0 este panică extremă (toate rele) și 100 este euforie extremă (toate foarte bune), 50 fiind neutru.
+    3. Stabilește un sentiment general (bullish/bearish/neutral).
+
+    Răspunde STRICT cu un singur obiect JSON valabil conform acestei structuri:
+    {
+      "news": [
+        { "headline": "textul știrii exact", "polarity": "positive" | "negative" | "neutral" }
+      ],
+      "aggregateScore": numar_intre_0_si_100,
+      "sentiment": "bullish" | "bearish" | "neutral"
+    }
+    Nu adăuga niciun alt text, sfat sau cod markdown în afară de JSON brut.
+
+defaultTest:
+  assert:
+    - type: javascript
+      value: |
+        const m = output.match(/\{[\s\S]*\}/);
+        if (!m) return false;
+        const o = JSON.parse(m[0]);
+        return Array.isArray(o.news) &&
+          o.news.every(n => typeof n.headline === 'string' && ['positive', 'negative', 'neutral'].includes(n.polarity)) &&
+          typeof o.aggregateScore === 'number' &&
+          o.aggregateScore >= 0 && o.aggregateScore <= 100 &&
+          ['bullish', 'bearish', 'neutral'].includes(o.sentiment);
+
+tests:
+  - description: "Mixed headlines - obvious positive and negative correctly classified"
+    vars:
+      symbol: BTC
+      headlines: |
+        1. Bitcoin reaches stunning new all time high!
+        2. Massive exchange hack loses millions of user funds.
+        3. Bitcoin price remains stable during the weekend.
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          const pos = (o.news || []).find(n => n.headline.includes('high'));
+          return pos?.polarity === 'positive';
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          const neg = (o.news || []).find(n => n.headline.includes('hack'));
+          return neg?.polarity === 'negative';
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return (o.news || []).length === 3;
+
+  - description: "All positive headlines - aggregate score should be above 50"
+    vars:
+      symbol: ETH
+      headlines: |
+        1. Ethereum ETF approved by SEC, institutions rush in.
+        2. Ethereum hits new all-time high above $10,000.
+        3. Major bank announces Ethereum integration for payments.
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.aggregateScore > 50;
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.sentiment === 'bullish';
+
+  - description: "All negative headlines - aggregate score should be below 50"
+    vars:
+      symbol: BTC
+      headlines: |
+        1. Bitcoin crashes 30% after regulatory crackdown.
+        2. Major exchange files for bankruptcy, funds at risk.
+        3. Governments announce coordinated ban on crypto trading.
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.aggregateScore < 50;
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.sentiment === 'bearish';
+
+  - description: "Single unambiguous negative headline"
+    vars:
+      symbol: SOL
+      headlines: "1. Solana network suffers catastrophic outage, billions lost."
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return (o.news || [])[0]?.polarity === 'negative';
+
+  - description: "News count in output must match input count"
+    vars:
+      symbol: ADA
+      headlines: |
+        1. Cardano partners with African governments for digital ID.
+        2. Cardano founder dismisses competitor claims.
+        3. New Cardano DeFi protocol launches with $50M TVL.
+        4. Cardano staking rewards remain competitive.
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return (o.news || []).length === 4;

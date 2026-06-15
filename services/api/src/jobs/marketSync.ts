@@ -43,10 +43,10 @@ export async function syncMarketData() {
 }
 
 export function startMarketSyncCron() {
-	cron.schedule('*/5 * * * *', () => {
+	cron.schedule('*/1 * * * *', () => {
 		void syncMarketData();
 	});
 
-	console.log('> Market Sync Cron scheduled (every 5 minutes)');
+	console.log('> Market Sync Cron scheduled (every 1 minutes)');
 	void syncMarketData();
 }

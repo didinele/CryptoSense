@@ -1,0 +1,153 @@
+description: "Strategist Agent Evals - Final investment decision"
+
+evaluateOptions:
+  maxConcurrency: 1
+
+providers:
+  - id: openai:chat:llama3
+    config:
+      apiBaseUrl: "http://localhost:11434/v1"
+      apiKey: "ollama"
+
+prompts:
+  - |
+    Ești un strateg de investiții Crypto expert.
+    Activ: {{symbol}}
+
+    CONCLUZII ANALIST TEHNIC:
+    Trend: {{trend}}
+    Suport: {{support}} | Rezistență: {{resistance}}
+    Volatilitate: {{volatility}}
+
+    CONCLUZII SENTIMENT ȘTIRI:
+    Sentiment General: {{sentiment}}
+    Scor Agregat: {{aggregateScore}}/100
+
+    Ești obligat să alegi una dintre următoarele decizii: BUY, SELL, sau HOLD.
+    Scrie o scurtă 'explanation' bazată strict pe datele primite (NU inventa prețuri noi).
+    Acordă un scor de încredere 'confidence' (între 0 și 100).
+
+    Răspunde STRICT folosind următoarea structură JSON:
+    {
+      "recommendation": "BUY" | "SELL" | "HOLD",
+      "confidence": numar_0_100,
+      "explanation": "paragraf scurt"
+    }
+
+defaultTest:
+  options:
+    provider:
+      id: openai:chat:llama3
+      config:
+        apiBaseUrl: "http://localhost:11434/v1"
+        apiKey: "ollama"
+  assert:
+    - type: javascript
+      value: |
+        const m = output.match(/\{[\s\S]*\}/);
+        if (!m) return false;
+        const o = JSON.parse(m[0]);
+        return ['BUY', 'SELL', 'HOLD'].includes(o.recommendation) &&
+          typeof o.confidence === 'number' &&
+          o.confidence >= 0 && o.confidence <= 100 &&
+          typeof o.explanation === 'string' &&
+          o.explanation.length > 0;
+
+tests:
+  - description: "Both signals bullish - must not recommend SELL"
+    vars:
+      symbol: BTCUSDT
+      trend: bullish
+      support: "58000"
+      resistance: "65000"
+      volatility: "NU"
+      sentiment: bullish
+      aggregateScore: "78"
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.recommendation !== 'SELL';
+
+  - description: "Both signals bearish - must not recommend BUY"
+    vars:
+      symbol: BTCUSDT
+      trend: bearish
+      support: "28000"
+      resistance: "34000"
+      volatility: "DA (-12%)"
+      sentiment: bearish
+      aggregateScore: "22"
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.recommendation !== 'BUY';
+
+  - description: "Conflicting signals (bullish tech, bearish sentiment) - should HOLD"
+    vars:
+      symbol: ETHUSDT
+      trend: bullish
+      support: "3000"
+      resistance: "3800"
+      volatility: "NU"
+      sentiment: bearish
+      aggregateScore: "30"
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.recommendation === 'HOLD';
+
+  - description: "Conflicting signals (bearish tech, bullish sentiment) - should HOLD"
+    vars:
+      symbol: SOLUSDT
+      trend: bearish
+      support: "120"
+      resistance: "155"
+      volatility: "DA (-8%)"
+      sentiment: bullish
+      aggregateScore: "72"
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.recommendation === 'HOLD';
+
+  - description: "High volatility should lower confidence"
+    vars:
+      symbol: DOGEUSDT
+      trend: neutral
+      support: "0.10"
+      resistance: "0.18"
+      volatility: "DA (40%)"
+      sentiment: neutral
+      aggregateScore: "50"
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.confidence < 80;
+
+  - description: "Explanation must not be a generic placeholder"
+    vars:
+      symbol: BTCUSDT
+      trend: bullish
+      support: "60000"
+      resistance: "70000"
+      volatility: "NU"
+      sentiment: bullish
+      aggregateScore: "85"
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.explanation && o.explanation.length > 20;
+      - type: llm-rubric
+        value: "The explanation references the provided trend, sentiment, or score and does not invent specific price figures beyond what was given in the prompt."

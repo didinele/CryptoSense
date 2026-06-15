@@ -17,6 +17,8 @@
 		"lint": "turbo run lint",
 		"lint:fix": "turbo run lint:fix",
 		"test": "turbo run test",
+		"eval": "promptfoo eval --config evals/analyst.yaml && promptfoo eval --config evals/sentiment.yaml && promptfoo eval --config evals/strategist.yaml",
+		"eval:view": "promptfoo view",
 		"update": "yarn upgrade-interactive"
 	},
 	"devDependencies": {
@@ -29,10 +31,14 @@
 		"lodash.merge": "^4.6.2",
 		"prettier": "^3.8.3",
 		"prettier-plugin-tailwindcss": "^0.8.0",
+		"promptfoo": "^0.121.15",
 		"rimraf": "^6.1.3",
 		"turbo": "^1.13.0",
 		"typescript": "^5.9.3",
 		"typescript-eslint": "^8.59.2",
 		"vitest": "^1.6.1"
+	},
+	"volta": {
+		"node": "22.22.3"
 	}
 }

@@ -1,0 +1,125 @@
+description: "Analyst Agent Evals - Technical price analysis"
+
+evaluateOptions:
+  maxConcurrency: 1
+
+providers:
+  - id: openai:chat:llama3
+    config:
+      apiBaseUrl: "http://localhost:11434/v1"
+      apiKey: "ollama"
+
+prompts:
+  - |
+    Ești un analist tehnic crypto expert.
+    Analizează următoarele prețuri recente pentru {{symbol}}: {{prices}}.
+    Te rog să extragi nivelul de suport (cel mai mic punct recent), nivelul de rezistență (cel mai mare punct recent) și să declari un trend (bullish/bearish/neutral).
+    Dacă diferența procentuală DINTRE PRIMUL PREȚ ȘI ULTIMUL PREȚ din array depășește 5%, indiferent că este creștere sau scădere (volatilitate absolută), setează volatilityAlert la true și menționează volatilityPercentage NUMAI CA NUMĂR întreg sau floating point brut, FĂRĂ simbolul de procente. Fii extrem de atent la calcule matematice: (ultimul - primul)/primul * 100.
+    Dacă diferența procentuală ESTE MAI MICĂ de 5%, volatilityAlert = false și volatilityPercentage = 0.
+
+    Răspunde STRICT folosind următoarea structură JSON, fără nimic altceva:
+    {
+      "trend": "bullish" | "bearish" | "neutral",
+      "support": număr,
+      "resistance": număr,
+      "volatilityAlert": boolean,
+      "volatilityPercentage": număr procentual brut,
+      "reasoning": "scurtă explicație tehnică"
+    }
+
+defaultTest:
+  assert:
+    - type: javascript
+      value: |
+        const m = output.match(/\{[\s\S]*\}/);
+        if (!m) return false;
+        const o = JSON.parse(m[0]);
+        return ['bullish', 'bearish', 'neutral'].includes(o.trend) &&
+          typeof o.support === 'number' &&
+          typeof o.resistance === 'number' &&
+          typeof o.volatilityAlert === 'boolean' &&
+          typeof o.volatilityPercentage === 'number' &&
+          typeof o.reasoning === 'string' &&
+          o.reasoning.length > 0;
+
+tests:
+  - description: "Stable prices (< 5% change) - no volatility alert expected"
+    vars:
+      symbol: BTCUSDT
+      prices: "60000, 60200, 59900, 60100"
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.volatilityAlert === false;
+
+  - description: "15% dump - volatility alert, bearish trend, percentage >= 5"
+    vars:
+      symbol: BTCUSDT
+      prices: "100, 96, 92, 85"
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.volatilityAlert === true;
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return Math.abs(o.volatilityPercentage) >= 5;
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.trend === 'bearish';
+
+  - description: "35% rally - bullish trend, volatility alert"
+    vars:
+      symbol: ETHUSDT
+      prices: "2000, 2300, 2500, 2700"
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.trend === 'bullish';
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.volatilityAlert === true;
+
+  - description: "Support must always be strictly less than resistance"
+    vars:
+      symbol: SOLUSDT
+      prices: "150, 145, 155, 148, 152"
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.support < o.resistance;
+
+  - description: "Sideways market - neutral trend"
+    vars:
+      symbol: ADAUSDT
+      prices: "0.50, 0.51, 0.49, 0.50, 0.51"
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.trend === 'neutral';
+
+  - description: "Exact 5% drop boundary - should trigger alert"
+    vars:
+      symbol: FAKECOIN
+      prices: "200, 195, 192, 190"
+    assert:
+      - type: javascript
+        value: |
+          const m = output.match(/\{[\s\S]*\}/);
+          const o = m ? JSON.parse(m[0]) : {};
+          return o.volatilityAlert === true;
