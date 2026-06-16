@@ -8,7 +8,7 @@
 
 ## 🏗️ Technical Architecture & Monorepo
 
-The codebase is built as a scalable full-stack Node.js/TypeScript monorepo using **Yarn Workspaces** and **Turborepo**, heavily inspired by the `SimplyChords` architecture.
+The codebase is built as a scalable full-stack Node.js/TypeScript monorepo using **Yarn Workspaces** and **Turborepo**.
 
 ### Tech Stack
 

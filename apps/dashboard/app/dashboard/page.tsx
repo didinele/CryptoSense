@@ -12,6 +12,95 @@ import { useGetUserSymbols, useAddUserSymbol, useRemoveUserSymbol } from '@/api/
 
 type PipelinePhase = 'analyzing' | 'idle' | 'strategizing';
 
+function PriceSparkline({
+	prices,
+	support,
+	resistance,
+}: {
+	readonly prices: number[];
+	readonly resistance: number;
+	readonly support: number;
+}) {
+	const W = 300;
+	const H = 72;
+	const all = [...prices, support, resistance];
+	const min = Math.min(...all);
+	const max = Math.max(...all);
+	const range = max - min || 1;
+
+	const tx = (i: number) => (i / (prices.length - 1)) * W;
+	const ty = (p: number) => H - ((p - min) / range) * H;
+
+	const d = prices.map((p, i) => `${i === 0 ? 'M' : 'L'} ${tx(i).toFixed(1)} ${ty(p).toFixed(1)}`).join(' ');
+	const sy = ty(support).toFixed(1);
+	const ry = ty(resistance).toFixed(1);
+
+	return (
+		<div className="rounded bg-gray-900 p-2">
+			<p className="mb-1 text-xs font-semibold text-gray-400">Price History</p>
+			<svg className="h-18 w-full" preserveAspectRatio="none" viewBox={`0 0 ${W} ${H}`}>
+				<path d={d} fill="none" stroke="#60a5fa" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+				<line
+					stroke="#4ade80"
+					strokeDasharray="4 3"
+					strokeWidth="1"
+					vectorEffect="non-scaling-stroke"
+					x1={0}
+					x2={W}
+					y1={sy}
+					y2={sy}
+				/>
+				<line
+					stroke="#f87171"
+					strokeDasharray="4 3"
+					strokeWidth="1"
+					vectorEffect="non-scaling-stroke"
+					x1={0}
+					x2={W}
+					y1={ry}
+					y2={ry}
+				/>
+			</svg>
+			<div className="mt-1 flex justify-between text-xs text-gray-500">
+				<span className="text-green-400">— support</span>
+				<span className="text-red-400">— resistance</span>
+			</div>
+		</div>
+	);
+}
+
+function SentimentBreakdown({ news }: { readonly news: { polarity: 'negative' | 'neutral' | 'positive' }[] }) {
+	const counts = { positive: 0, neutral: 0, negative: 0 };
+	for (const item of news) counts[item.polarity]++;
+	const total = news.length || 1;
+
+	const bars: { color: string; count: number; label: string }[] = [
+		{ label: 'Positive', count: counts.positive, color: 'bg-green-500' },
+		{ label: 'Neutral', count: counts.neutral, color: 'bg-gray-500' },
+		{ label: 'Negative', count: counts.negative, color: 'bg-red-500' },
+	];
+
+	return (
+		<div className="rounded bg-gray-900 p-3">
+			<p className="mb-2 text-xs font-semibold text-gray-400">Headline Breakdown</p>
+			<div className="space-y-1.5">
+				{bars.map(({ label, count, color }) => (
+					<div className="flex items-center gap-2" key={label}>
+						<span className="w-14 text-right text-xs text-gray-400">{label}</span>
+						<div className="flex-1 overflow-hidden rounded-full bg-gray-700" style={{ height: '8px' }}>
+							<div
+								className={`h-full rounded-full ${color} transition-all`}
+								style={{ width: `${(count / total) * 100}%` }}
+							/>
+						</div>
+						<span className="w-4 text-xs text-gray-400">{count}</span>
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
+
 export default function DashboardPage() {
 	const { data: user, isLoading, isError, isFetching } = useMe();
 	const logout = useLogout();
@@ -223,6 +312,13 @@ export default function DashboardPage() {
 												⚠️ Price moved {analysis.volatilityPercentage}% recently
 											</div>
 										)}
+										{analysis.prices.length > 1 && (
+											<PriceSparkline
+												prices={analysis.prices}
+												resistance={analysis.resistance}
+												support={analysis.support}
+											/>
+										)}
 										<div className="grid grid-cols-3 gap-3">
 											<div className="rounded bg-gray-700 p-3">
 												<p className="text-xs tracking-wider text-gray-400 uppercase">Trend</p>
@@ -307,6 +403,7 @@ export default function DashboardPage() {
 												})()}
 											</div>
 										</div>
+										<SentimentBreakdown news={sentimentData.news} />
 										<div>
 											<p className="mb-1.5 text-xs font-semibold text-gray-400">Headlines</p>
 											<ul className="max-h-48 space-y-1.5 overflow-y-auto">

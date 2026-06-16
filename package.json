@@ -18,6 +18,7 @@
 		"lint:fix": "turbo run lint:fix",
 		"test": "turbo run test",
 		"eval": "promptfoo eval --config evals/analyst.yaml && promptfoo eval --config evals/sentiment.yaml && promptfoo eval --config evals/strategist.yaml",
+		"eval:nocache": "promptfoo eval --config evals/analyst.yaml --no-cache && promptfoo eval --config evals/sentiment.yaml --no-cache && promptfoo eval --config evals/strategist.yaml --no-cache",
 		"eval:view": "promptfoo view",
 		"update": "yarn upgrade-interactive"
 	},

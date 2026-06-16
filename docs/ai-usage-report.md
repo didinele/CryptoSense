@@ -54,13 +54,47 @@ Nucleul aplicatiei este reprezentat de cei trei agenti AI care ruleaza pe un LLM
 
 **Instrumente:** Claude Pro / Claude Code
 
-Proiectul contine trei fisiere de evaluare automata a agentilor (`analyst.eval.test.ts`, `sentiment.eval.test.ts`, `strategist.eval.test.ts`), generate si rafinate cu asistenta AI. Acestea nu sunt teste unitare clasice -- sunt **evals**, adica teste care apeleaza efectiv agentul (inclusiv LLM-ul local, daca e disponibil) si verifica:
+Proiectul contine doua straturi complementare de evaluare automata a agentilor, generate si rafinate cu asistenta AI.
+
+### 5.1 Evals in-process (Vitest)
+
+Trei fisiere TypeScript (`analyst.eval.test.ts`, `sentiment.eval.test.ts`, `strategist.eval.test.ts`) apeleaza agentii prin interfata lor TypeScript reala, inclusiv fallback-ul algoritmic, si verifica:
 
 - **Conformitatea schemei:** Output-ul este validat prin `AnalystOutputSchema.parse()` / `SentimentOutputSchema.safeParse()` -- daca LLM-ul returneaza text malformat, testul pica.
 - **Logica comportamentala:** De exemplu, testul de volatilitate furnizeaza un array de preturi cu o scadere de 15% si verifica explicit ca `volatilityAlert === true` si `volatilityPercentage >= 5`, indiferent daca raspunsul vine de la LLM sau de la fallback-ul algoritmic.
 - **Clasificarea sentimentului:** Un test furnizeaza titluri intentionat mixte (un articol despre un record de pret, un articol despre un hack de exchange) si verifica ca agentul clasifica corect polaritatea fiecaruia.
 
 Timeout-ul testelor este setat la 60 de secunde pentru a acomoda latenta generarii locale.
+
+### 5.2 Evals directe pe prompturi (promptfoo / YAML)
+
+Al doilea strat consta in trei fisiere YAML (`evals/analyst.yaml`, `evals/sentiment.yaml`, `evals/strategist.yaml`) care ruleaza prompturile **direct impotriva Ollama**, ocolind complet codul TypeScript. Aceasta abordare izoleaza calitatea promptului de implementare si permite rularea unui numar mai mare de scenarii cu asertii JavaScript inline.
+
+**Analyst (6 scenarii):**
+
+- Preturi stabile (< 5% variatie) -- `volatilityAlert` trebuie sa fie `false`
+- Dump de 15% -- `volatilityAlert: true`, `volatilityPercentage >= 5`, trend `bearish`
+- Rally de 35% -- trend `bullish`, `volatilityAlert: true`
+- Invariant structural: `support < resistance` intotdeauna
+- Piata flat (toate preturile egale) -- trend `neutral`
+- Drop de 30% -- `volatilityAlert: true`
+
+**Sentiment (5 scenarii):**
+
+- Titluri mixte: articolul despre record de pret clasificat `positive`, cel despre hack clasificat `negative`
+- Toate titlurile pozitive: `aggregateScore > 50` si `sentiment: bullish`
+- Toate titlurile negative: `aggregateScore < 50` si `sentiment: bearish`
+- Un singur titlu negativ neambiguu: polarity `negative`
+- Numarul de stiri din output trebuie sa coincida exact cu numarul din input
+
+**Strategist (6 scenarii):**
+
+- Ambele semnale bullish -- recomandare diferita de `SELL`
+- Ambele semnale bearish -- recomandare diferita de `BUY`
+- Semnale contradictorii (tehnic bullish, sentiment bearish) -- recomandare `HOLD`
+- Semnale contradictorii (tehnic bearish, sentiment bullish) -- recomandare `HOLD`
+- Volatilitate mare (40%) -- `confidence < 85`
+- Explicatia generata nu trebuie sa fie un placeholder generic (lungime > 30 caractere, cu referinta la datele primite)
 
 ---
 

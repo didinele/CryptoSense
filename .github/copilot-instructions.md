@@ -4,7 +4,7 @@ Welcome to the CryptoSense codebase! This file outlines the architectural standa
 
 ## 🏗️ Architecture & Monorepo Overview
 
-This project uses **Yarn Workspaces (Yarn v4)** and **Turborepo** to manage multiple packages. It represents a microservices-driven approach heavily inspired by the `SimplyChords` architecture.
+This project uses **Yarn Workspaces (Yarn v4)** and **Turborepo** to manage multiple packages. It represents a microservices-driven approach.
 
 - **Frontend (`apps/dashboard`)**: Next.js 15 App router app using React Compiler and Tailwind CSS v4.
 - **Backend (`services/api`)**: Node.js APIs built with `polka`. It imports shared logic from packages.

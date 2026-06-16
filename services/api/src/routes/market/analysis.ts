@@ -4,11 +4,15 @@ import { runAnalystAgent, AnalystOutputSchema } from '../../ai/analyst.js';
 import { requireAuth } from '../../auth/middleware.js';
 import { defineRoute } from '../../core/route.js';
 
+const AnalysisResponseSchema = AnalystOutputSchema.extend({
+	prices: z.array(z.number()),
+});
+
 export const analyzeSymbolSchema = {
 	query: z.object({
 		symbol: z.string().min(1),
 	}),
-	response: AnalystOutputSchema,
+	response: AnalysisResponseSchema,
 };
 
 export const analyzeSymbolRoute = defineRoute({
@@ -21,9 +25,9 @@ export const analyzeSymbolRoute = defineRoute({
 
 		// Preluam ultimele 50 de inregistrari de pret din baza de date pentru simbolul ales
 		const rows = await db`
-			SELECT price FROM market_data 
-			WHERE symbol = ${symbol} 
-			ORDER BY timestamp DESC 
+			SELECT price FROM market_data
+			WHERE symbol = ${symbol}
+			ORDER BY timestamp DESC
 			LIMIT 50
 		`;
 
@@ -35,6 +39,7 @@ export const analyzeSymbolRoute = defineRoute({
 		const prices = rows.map(r => Number(r['price'])).reverse();
 
 		// Rulăm AI Agent-ul peste setul de date
-		return runAnalystAgent(symbol, prices);
+		const analysis = await runAnalystAgent(symbol, prices);
+		return { ...analysis, prices };
 	},
 });
